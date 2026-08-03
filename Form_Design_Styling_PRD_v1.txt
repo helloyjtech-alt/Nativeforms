@@ -1,0 +1,2286 @@
+
+
+PRODUCT REQUIREMENTS DOCUMENT
+
+Form Design & Styling System
+
+Custom Form Builder — Shopify App
+
+Version 1.0  |  2026
+
+
+
+
+
+1. Overview
+
+This PRD defines every styling option exposed to merchants in the Custom Form Builder Shopify app. The styling system covers two levels of control:
+
+Global (Form-level) — styles applied to the entire form block as defaults. Every field inherits these unless overridden.
+
+Individual (Field-level) — per-field overrides that activate only when the merchant explicitly enables "Customize this field."
+
+All style controls are surfaced as native Shopify Theme Editor sidebar settings (no custom CSS knowledge required). An Advanced / raw CSS escape hatch is also provided at both levels for merchants on the Growth plan.
+
+
+
+2. Scope of Elements
+
+The styling system covers the following UI elements:
+
+Form Section Wrapper (outermost container inserted by the theme block)
+
+Form Inner Container (the card/box that visually wraps the form)
+
+Form Header area (title, subtitle)
+
+Field Row / Column layout wrapper
+
+Labels
+
+Input fields — text, email, number, URL, password, hidden (all share one set of input styles)
+
+Textarea (Long Text)
+
+Custom Select (built as <div> + <span>, not a native <select>)
+
+Dropdown option list and individual option items
+
+Radio Group wrapper + individual Radio item
+
+Checkbox Group wrapper + individual Checkbox item
+
+Date Picker field
+
+File Upload field
+
+Consent / legal Checkbox
+
+Section Heading (divider label within the form)
+
+Star / Rating widget
+
+Custom Placeholder (rendered as <span> inside the field, not native placeholder)
+
+Help Text / Description
+
+Validation Error message
+
+Submit Button
+
+Success / Thank-you message block
+
+Progress Bar (multi-step forms)
+
+
+
+3. Architecture — Two-Level Style System
+
+3.1  Global Form Styles (inherited by all fields)
+
+Set on the root Custom Form Builder block in the Theme Editor sidebar. All fields inherit these values unless overridden at the field level. Changing a global setting updates every field that has not been individually overridden — live in the Theme Editor preview.
+
+
+
+3.2  Field-Level Style Override
+
+Each field block exposes a "Customize style for this field" toggle (off by default). When enabled, the sidebar reveals a compact override panel. Only the properties a merchant touches in this panel are written to that field's settings; everything else continues to inherit from global. This means merchants only need to override what's genuinely different for one specific field.
+
+
+
+3.3  Hover / Focus / Active / Disabled States
+
+Both global and field-level panels include a State sub-section. A segmented control lets the merchant switch the sidebar into Default | Hover | Focus | Error | Disabled view — the controls shown are the same set but write to state-specific CSS custom properties (e.g. --fbw-input-border-color-hover). The live canvas preview enters that state on the hovered/focused demo field so merchants see the effect instantly.
+
+
+
+4. Global Form Styles — Full Property Reference
+
+4.1  Form Section Wrapper (outermost)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Width
+
+Overall section width in the page
+
+px, %, vw, auto
+
+Max Width
+
+Cap the section width
+
+px, %, none
+
+Min Width
+
+Minimum section width
+
+px, %, none
+
+Horizontal Alignment
+
+Align the section within the page column
+
+Left / Center / Right
+
+Background Color
+
+Section background fill
+
+Color picker + opacity
+
+Background Image
+
+Optional background image
+
+Upload + position + size + repeat
+
+Padding (T/R/B/L)
+
+Inner spacing of the section
+
+px / rem — linked or individual
+
+Margin (T/R/B/L)
+
+Outer spacing around the section
+
+px / rem — linked or individual
+
+
+
+4.2  Form Inner Container (card / box)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Background Color
+
+Card fill color
+
+Color picker + opacity
+
+Padding (T/R/B/L)
+
+Space inside the card
+
+px / rem — linked or individual
+
+Border Radius (T/R/B/L)
+
+Corner rounding — per-corner or linked
+
+px, %
+
+Border Style
+
+Card border type
+
+None / Solid / Dashed / Dotted / Double
+
+Border Width (T/R/B/L)
+
+Card border thickness per side
+
+px — individual
+
+Border Color
+
+Card border color
+
+Color picker
+
+Box Shadow
+
+Drop shadow on the card
+
+X, Y, Blur, Spread, Color, Inset toggle
+
+Outline
+
+CSS outline (separate from border)
+
+Width, Style, Color, Offset
+
+Max Width
+
+Maximum width of the card
+
+px, %, none
+
+Min Width
+
+Minimum width of the card
+
+px, %, none
+
+Width
+
+Explicit width override
+
+px, %, auto
+
+Min Height
+
+Minimum height of the card
+
+px, vh, auto
+
+Overflow
+
+Clip or scroll overflowing content
+
+Visible / Hidden / Scroll / Auto
+
+Backdrop Filter
+
+Blur behind transparent card (glass effect)
+
+Blur amount in px
+
+
+
+4.3  Form Header (Title & Subtitle area)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Show Title
+
+Toggle the form title
+
+On / Off
+
+Title Text
+
+Editable title string
+
+Text input
+
+Title Font Family
+
+Title typeface
+
+Font picker
+
+Title Font Size
+
+Title size
+
+px / rem / em
+
+Title Font Weight
+
+Title weight
+
+100–900 slider
+
+Title Font Style
+
+Italic / Normal
+
+Toggle
+
+Title Color
+
+Title text color
+
+Color picker
+
+Title Letter Spacing
+
+Tracking between characters
+
+px / em
+
+Title Line Height
+
+Leading for the title
+
+Unitless / px
+
+Title Text Align
+
+Alignment of the title
+
+Left / Center / Right
+
+Title Text Transform
+
+Case transformation
+
+None / Uppercase / Lowercase / Capitalize
+
+Title Text Decoration
+
+Underline / strikethrough
+
+None / Underline / Strikethrough
+
+Title Margin Bottom
+
+Space below the title
+
+px / rem
+
+Show Subtitle
+
+Toggle the form subtitle
+
+On / Off
+
+Subtitle — all typography
+
+Same full set as Title above
+
+(mirrors Title controls)
+
+Header Padding
+
+Space inside the header area
+
+px — T/R/B/L
+
+Header Border Bottom
+
+Separator line below header
+
+Width, Style, Color
+
+Header Background
+
+Background fill of header area
+
+Color picker + opacity
+
+Header Text Align
+
+Align title + subtitle together
+
+Left / Center / Right
+
+
+
+4.4  Form Layout & Field Grid
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Layout Mode
+
+Field arrangement
+
+Single Column / 2 Columns / 3 Columns / 4 Columns / Custom Grid
+
+Column Gap
+
+Horizontal gap between field columns
+
+px / rem
+
+Row Gap
+
+Vertical gap between field rows
+
+px / rem
+
+Field Width (default)
+
+Default width of each field in the grid
+
+100% / 75% / 66% / 50% / 33% / 25% / Auto
+
+Label Position (global)
+
+Where labels appear by default
+
+Top / Inline-left / Inline-right / Floating (animated)
+
+Label Gap
+
+Space between label and input
+
+px / rem
+
+Form Direction
+
+LTR or RTL form
+
+Left-to-Right / Right-to-Left
+
+Vertical Rhythm
+
+Auto-spacing mode between all fields
+
+Compact / Comfortable / Spacious / Custom
+
+
+
+4.5  Typography — Global Defaults
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Base Font Family
+
+Font for all form text
+
+Font picker (Google Fonts + system fonts)
+
+Base Font Size
+
+Root text size (all em/rem values scale from this)
+
+px
+
+Base Line Height
+
+Global line height
+
+Unitless / px
+
+Base Letter Spacing
+
+Global tracking
+
+px / em
+
+Base Text Color
+
+Default text color
+
+Color picker
+
+Label Font Size
+
+Size of field labels
+
+px / rem / em
+
+Label Font Weight
+
+Weight of field labels
+
+100–900
+
+Label Font Style
+
+Normal / Italic
+
+Toggle
+
+Label Color
+
+Default label color
+
+Color picker
+
+Label Text Transform
+
+Case of labels
+
+None / Uppercase / Lowercase / Capitalize
+
+Label Letter Spacing
+
+Tracking on labels
+
+px / em
+
+Help Text Font Size
+
+Size of help text below fields
+
+px / rem / em
+
+Help Text Color
+
+Color of help text
+
+Color picker
+
+Help Text Font Style
+
+Normal / Italic
+
+Toggle
+
+Error Text Font Size
+
+Validation error font size
+
+px / rem / em
+
+Error Text Color
+
+Validation error text color
+
+Color picker
+
+Error Text Font Weight
+
+Validation error weight
+
+100–900
+
+
+
+4.6  Input Fields — Global (Text, Email, Number, URL, Textarea)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Background Color
+
+Input fill color
+
+Color picker + opacity
+
+Text Color
+
+Input text color
+
+Color picker
+
+Font Size
+
+Input text size
+
+px / rem / em
+
+Font Weight
+
+Input text weight
+
+100–900
+
+Font Family
+
+Input font (override global)
+
+Font picker
+
+Height
+
+Input height (single-line)
+
+px / rem / em / auto
+
+Min Height
+
+Minimum height
+
+px / rem
+
+Max Height
+
+Maximum height (useful for textarea)
+
+px / rem / none
+
+Width
+
+Input width override
+
+px / % / auto
+
+Min Width
+
+Minimum width
+
+px / % / none
+
+Max Width
+
+Maximum width
+
+px / % / none
+
+Padding (T/R/B/L)
+
+Inner spacing of the input
+
+px / rem — linked or individual
+
+Border Radius (T/R/B/L)
+
+Corner rounding
+
+px, % — linked or individual
+
+Border Style
+
+Input border type
+
+None / Solid / Dashed / Dotted / Double
+
+Border Width (T/R/B/L)
+
+Border thickness per side
+
+px — individual
+
+Border Color
+
+Input border color
+
+Color picker
+
+Box Shadow
+
+Input shadow
+
+X, Y, Blur, Spread, Color, Inset toggle
+
+Outline
+
+CSS outline (visible on keyboard focus)
+
+Width, Style, Color, Offset
+
+Outline Offset
+
+Gap between border and outline
+
+px
+
+Resize (textarea)
+
+Which directions can textarea resize
+
+None / Vertical / Horizontal / Both
+
+Transition
+
+Smooth state changes
+
+Duration (ms), Easing
+
+
+
+Hover / Focus / Error / Disabled sub-section repeats: Background Color, Border Color, Box Shadow, Text Color, Outline.
+
+
+
+4.7  Custom Placeholder (Span-based, not native)
+
+Placeholder text is rendered as a <span> element positioned absolutely inside the field wrapper, not as the native HTML placeholder attribute. This unlocks full CSS styling and animation control unavailable with native placeholders.
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Placeholder Text
+
+The text shown before the user types
+
+Text input per field
+
+Font Family
+
+Placeholder typeface
+
+Font picker
+
+Font Size
+
+Placeholder text size
+
+px / rem / em
+
+Font Weight
+
+Placeholder weight
+
+100–900
+
+Font Style
+
+Normal / Italic
+
+Toggle
+
+Color
+
+Placeholder text color
+
+Color picker + opacity
+
+Letter Spacing
+
+Placeholder tracking
+
+px / em
+
+Transition
+
+Animation duration + easing
+
+ms, Ease / Linear / Custom cubic-bezier
+
+Animation Style
+
+How the placeholder behaves when the user focuses the field
+
+See list below
+
+Animation Duration
+
+Speed of the placeholder animation
+
+ms
+
+Animation Easing
+
+Easing curve
+
+Ease / Linear / Ease-in / Ease-out / Ease-in-out / cubic-bezier
+
+Position (default)
+
+Where placeholder sits at rest
+
+Vertically centered (default) / Top / Custom offset
+
+
+
+Placeholder Animation Options:
+
+None — static, disappears on type (same as native)
+
+Slide Up — placeholder slides upward to become a floating label above the field
+
+Slide Up + Scale — slides up AND scales down to label size simultaneously
+
+Fade Out — placeholder gently fades to 0 opacity when user focuses
+
+Slide Left — placeholder translates left and fades out
+
+Fly Out (Upward) — placeholder animates out toward the top of the field and disappears
+
+Fly Out (Downward) — placeholder exits toward the bottom
+
+Typewriter Erase — characters erase one by one (CSS animation, no JS required)
+
+Shimmer — placeholder text has a shimmer/glint animation at rest (attention-draw)
+
+Pulse — placeholder gently pulses in opacity at rest
+
+
+
+4.8  Custom Select / Dropdown (Div + Span, not native <select>)
+
+Dropdown fields use a fully custom implementation (div/span markup) so merchants have complete styling and animation control. Three sub-elements are styled independently:
+
+
+
+A. Select Trigger (the visible "selected value" box):
+
+Inherits all input properties from Section 4.6 plus:
+
+Arrow Icon — custom icon upload, color, size, rotation animation on open
+
+Trigger Padding — separate control from global input padding
+
+Hover state — background, border, text color
+
+B. Dropdown Panel (the open list):
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Background Color
+
+Panel fill
+
+Color picker
+
+Border Radius
+
+Panel corner rounding
+
+px — linked or individual
+
+Border
+
+Panel border
+
+Width, Style, Color
+
+Box Shadow
+
+Panel drop shadow
+
+X, Y, Blur, Spread, Color
+
+Max Height
+
+Scroll if options exceed this height
+
+px / vh
+
+Z-Index
+
+Stack order (avoid overlap bugs)
+
+Number
+
+Panel Open Animation
+
+How the list appears
+
+Fade / Slide Down / Scale Down / None
+
+Panel Animation Duration
+
+Speed
+
+ms
+
+Panel Animation Easing
+
+Easing curve
+
+Ease / Linear / cubic-bezier
+
+Padding
+
+Inner padding of the panel
+
+px — T/R/B/L
+
+C. Option Items (each row in the list):
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Background Color
+
+Default option background
+
+Color picker
+
+Text Color
+
+Option text color
+
+Color picker
+
+Font Size
+
+Option text size
+
+px / rem
+
+Font Weight
+
+Option text weight
+
+100–900
+
+Padding (T/R/B/L)
+
+Spacing inside each option
+
+px / rem
+
+Border Bottom
+
+Separator between options
+
+Width, Style, Color
+
+Border Radius
+
+Rounding on each option
+
+px
+
+Hover Background
+
+Background when hovering an option
+
+Color picker
+
+Hover Text Color
+
+Text color when hovering an option
+
+Color picker
+
+Selected Background
+
+Background of the currently-selected option
+
+Color picker
+
+Selected Text Color
+
+Text of the selected option
+
+Color picker
+
+Selected Font Weight
+
+Weight of selected option
+
+100–900
+
+Checkmark / Icon
+
+Show a checkmark on selected option
+
+On / Off + Color
+
+Item Transition
+
+Smooth hover color change
+
+Duration ms, Easing
+
+
+
+4.9  Radio Group
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Layout Direction
+
+Horizontal or vertical radio list
+
+Row / Column
+
+Gap between items
+
+Spacing between radio options
+
+px / rem
+
+Radio Button Size
+
+Diameter of the radio circle
+
+px
+
+Unchecked Border Color
+
+Radio circle border when unselected
+
+Color picker
+
+Unchecked Background
+
+Radio circle fill when unselected
+
+Color picker
+
+Checked Border Color
+
+Border when selected
+
+Color picker
+
+Checked Fill Color
+
+Inner dot / fill color when selected
+
+Color picker
+
+Checked Background
+
+Circle background when selected
+
+Color picker
+
+Focus Ring Color
+
+Keyboard focus indicator color
+
+Color picker
+
+Label Spacing
+
+Gap between circle and label text
+
+px
+
+Label Font Size
+
+Radio option label size
+
+px / rem
+
+Label Font Weight
+
+Radio option label weight
+
+100–900
+
+Label Color
+
+Radio option label color
+
+Color picker
+
+Hover Label Color
+
+Label color on hover
+
+Color picker
+
+Hover Background
+
+Row background on hover
+
+Color picker
+
+Animation Style
+
+Checked state transition
+
+Scale pop / Fade fill / Ripple / None
+
+Transition Duration
+
+Animation speed
+
+ms
+
+
+
+4.10  Checkbox Group
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Layout Direction
+
+Horizontal or vertical
+
+Row / Column
+
+Gap between items
+
+Spacing between checkboxes
+
+px / rem
+
+Checkbox Size
+
+Width × height of the checkbox box
+
+px
+
+Border Radius
+
+Square vs rounded checkbox
+
+px / %
+
+Unchecked Border Color
+
+Border when unchecked
+
+Color picker
+
+Unchecked Background
+
+Fill when unchecked
+
+Color picker
+
+Checked Border Color
+
+Border when checked
+
+Color picker
+
+Checked Background
+
+Fill when checked
+
+Color picker
+
+Checkmark Color
+
+Color of the ✓ mark
+
+Color picker
+
+Checkmark Style
+
+Which icon to use as the checkmark
+
+Default ✓ / Bold ✓ / Thin ✓ / Custom SVG
+
+Focus Ring Color
+
+Keyboard focus outline color
+
+Color picker
+
+Label Spacing
+
+Gap between box and label
+
+px
+
+Label Font Size / Weight / Color
+
+Label typography
+
+Same as Radio above
+
+Hover Background
+
+Row hover background
+
+Color picker
+
+Animation Style
+
+Checked state animation
+
+Bounce pop / Draw stroke / Fade fill / None
+
+Transition Duration
+
+Speed of check animation
+
+ms
+
+Indeterminate State
+
+Styling for mixed-select state
+
+Background + icon color
+
+
+
+4.11  Date Picker
+
+
+
+Inherits all input properties from Section 4.6. Additional date-specific options:
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Calendar Icon Color
+
+Color of the calendar trigger icon
+
+Color picker
+
+Calendar Icon Size
+
+Size of the icon
+
+px
+
+Calendar Panel Background
+
+Background of the date picker popup
+
+Color picker
+
+Calendar Panel Border
+
+Border of the popup panel
+
+Width, Style, Color
+
+Calendar Panel Shadow
+
+Box shadow on popup
+
+X, Y, Blur, Spread, Color
+
+Calendar Panel Border Radius
+
+Corner rounding of popup
+
+px
+
+Day Cell Hover Background
+
+Hover state on day cells
+
+Color picker
+
+Day Cell Selected Background
+
+Selected day cell fill
+
+Color picker
+
+Day Cell Selected Text Color
+
+Selected day text color
+
+Color picker
+
+Today Highlight Color
+
+Ring or dot marking today
+
+Color picker
+
+Month/Year Header Color
+
+Navigation header text color
+
+Color picker
+
+Navigation Arrow Color
+
+Prev/Next month arrows
+
+Color picker
+
+
+
+4.12  File Upload Field
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Drop Zone Height
+
+Height of the drag-and-drop area
+
+px / rem / auto
+
+Drop Zone Background
+
+Fill of the drop area
+
+Color picker + opacity
+
+Drop Zone Border
+
+Border style of the drop zone
+
+Width, Style (dashed default), Color
+
+Drop Zone Border Radius
+
+Corner rounding
+
+px / %
+
+Drop Zone Active Background
+
+Fill when file is dragged over
+
+Color picker
+
+Drop Zone Active Border Color
+
+Border when dragging over
+
+Color picker
+
+Icon Color
+
+Upload cloud/arrow icon color
+
+Color picker
+
+Icon Size
+
+Upload icon size
+
+px
+
+Instruction Text Color
+
+Drag & drop instruction text
+
+Color picker
+
+Button Style
+
+Style of the "Browse" button inside the zone
+
+Inherits Button settings
+
+File Chip Background
+
+Background of attached-file pill/chip
+
+Color picker
+
+File Chip Text Color
+
+Text color of file chip
+
+Color picker
+
+File Chip Border Radius
+
+Rounding of file chip
+
+px
+
+Remove Icon Color
+
+Color of the ✕ remove icon on file chip
+
+Color picker
+
+
+
+4.13  Rating / Star Widget
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Icon Type
+
+Shape used for rating
+
+Star / Heart / Thumb / Custom SVG
+
+Icon Size
+
+Size of each icon
+
+px
+
+Gap between icons
+
+Spacing between rating icons
+
+px
+
+Unselected Color
+
+Icon color when not selected
+
+Color picker
+
+Selected Color
+
+Icon color when selected / filled
+
+Color picker
+
+Hover Color
+
+Icon color on hover
+
+Color picker
+
+Animation Style
+
+Selection feedback animation
+
+Bounce / Scale pop / Shake / None
+
+Transition Duration
+
+Speed
+
+ms
+
+
+
+4.14  Submit Button
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Button Style Preset
+
+Quick style preset
+
+Solid / Outline / Ghost / Soft / Pill
+
+Width
+
+Button width
+
+Auto / Full Width / Fixed px
+
+Alignment
+
+Button alignment in the form
+
+Left / Center / Right
+
+Background Color
+
+Button fill
+
+Color picker
+
+Text Color
+
+Button label color
+
+Color picker
+
+Font Size
+
+Button label size
+
+px / rem / em
+
+Font Weight
+
+Button label weight
+
+100–900
+
+Font Family
+
+Button typeface override
+
+Font picker
+
+Letter Spacing
+
+Button label tracking
+
+px / em
+
+Text Transform
+
+Case of button text
+
+None / Uppercase / Capitalize
+
+Padding (T/R/B/L)
+
+Inner button spacing
+
+px / rem — linked or individual
+
+Height
+
+Explicit button height
+
+px / rem / auto
+
+Min Width
+
+Minimum button width
+
+px / none
+
+Border Radius (T/R/B/L)
+
+Corner rounding
+
+px / % — linked or individual
+
+Border Style
+
+Button border type
+
+None / Solid / Dashed / Dotted
+
+Border Width
+
+Button border thickness
+
+px
+
+Border Color
+
+Button border color
+
+Color picker
+
+Box Shadow
+
+Button shadow
+
+X, Y, Blur, Spread, Color, Inset
+
+Icon (left / right)
+
+Optional icon beside button text
+
+Icon picker + size + gap
+
+Loading Spinner Color
+
+Color of spinner during submission
+
+Color picker
+
+Loading Text
+
+Text shown while submitting
+
+Text input
+
+Hover Background
+
+Fill on hover
+
+Color picker
+
+Hover Text Color
+
+Text on hover
+
+Color picker
+
+Hover Border Color
+
+Border on hover
+
+Color picker
+
+Hover Box Shadow
+
+Shadow on hover
+
+X, Y, Blur, Spread, Color
+
+Hover Transform
+
+Micro-movement on hover
+
+None / Lift (translateY -2px) / Scale Up / Scale Down
+
+Active (pressed) Background
+
+Fill when clicked
+
+Color picker
+
+Active Transform
+
+Scale effect when pressed
+
+None / Press down (scale 0.97)
+
+Transition Duration
+
+Speed of all hover/active transitions
+
+ms
+
+Transition Easing
+
+Easing curve
+
+Ease / Linear / Ease-in-out / cubic-bezier
+
+Disabled Opacity
+
+Opacity when button is disabled
+
+0–1 (default 0.5)
+
+
+
+4.15  Success / Thank-You Message Block
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Display Type
+
+How the success message appears
+
+Inline replace / Toast notification / Redirect to URL
+
+Background Color
+
+Success block fill
+
+Color picker
+
+Border Radius
+
+Corner rounding
+
+px / %
+
+Border
+
+Border of the block
+
+Width, Style, Color
+
+Padding
+
+Inner spacing
+
+px — T/R/B/L
+
+Text Color
+
+Message text color
+
+Color picker
+
+Font Size
+
+Message font size
+
+px / rem
+
+Font Weight
+
+Message font weight
+
+100–900
+
+Text Align
+
+Message alignment
+
+Left / Center / Right
+
+Icon
+
+Show a success icon (✓)
+
+On/Off + Icon choice + Color + Size
+
+Entrance Animation
+
+How the block appears
+
+Fade In / Slide Down / Scale Up / None
+
+Animation Duration
+
+Speed
+
+ms
+
+
+
+4.16  Progress Bar (Multi-Step Forms)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Track Background
+
+Unfilled track color
+
+Color picker
+
+Track Height
+
+Height of the bar
+
+px
+
+Track Border Radius
+
+Corner rounding of track
+
+px / %
+
+Fill Color
+
+Filled progress color
+
+Color picker or gradient
+
+Fill Border Radius
+
+Rounding of the fill
+
+px / %
+
+Fill Transition Duration
+
+Animation speed as step changes
+
+ms
+
+Label Color
+
+Step label text color
+
+Color picker
+
+Label Font Size
+
+Step label size
+
+px / rem
+
+Step Indicator Style
+
+Style of step markers
+
+Dots / Numbers / None
+
+Active Step Color
+
+Current step indicator color
+
+Color picker
+
+Completed Step Color
+
+Completed step indicator color
+
+Color picker
+
+
+
+
+
+5. Field-Level Style Overrides
+
+Each field block has a "Customize style for this field" toggle in the Theme Editor sidebar. When disabled (default), the field inherits all global styles from Section 4. When enabled, the override panel reveals the following controls — they override only that specific field, for only the properties the merchant explicitly changes.
+
+
+
+5.1  Universal Field Override Controls (all field types)
+
+
+
+Property / Option
+
+Description
+
+Values / Notes
+
+Width
+
+Override this field's width in the grid
+
+100% / 75% / 66% / 50% / 33% / 25% / px / auto
+
+Label Color
+
+Override label color for this field only
+
+Color picker
+
+Label Font Size
+
+Override label size
+
+px / rem / em
+
+Label Font Weight
+
+Override label weight
+
+100–900
+
+Label Visibility
+
+Show or hide label for this field
+
+Visible / Hidden / Screen-reader only
+
+Input Background Color
+
+Override input fill
+
+Color picker
+
+Input Text Color
+
+Override input text color
+
+Color picker
+
+Input Border Color
+
+Override border color
+
+Color picker
+
+Input Border Width
+
+Override border width
+
+px
+
+Input Border Radius
+
+Override corner rounding
+
+px / %
+
+Input Box Shadow
+
+Override shadow
+
+X, Y, Blur, Spread, Color
+
+Input Padding
+
+Override inner spacing
+
+px — linked or individual
+
+Input Height
+
+Override height
+
+px / auto
+
+Input Font Size
+
+Override text size inside input
+
+px / rem
+
+Custom CSS Class
+
+Add a CSS class to this field wrapper
+
+Text input (developer escape hatch)
+
+Custom CSS (raw)
+
+Raw CSS scoped to this field (Growth plan)
+
+Code textarea
+
+Hover State Overrides
+
+Border / background / shadow on hover
+
+Same controls as default above
+
+Focus State Overrides
+
+Border / background / shadow on focus
+
+Same controls as default above
+
+Error State Overrides
+
+Border / background / text color on error
+
+Same controls as default above
+
+
+
+5.2  Field-Type-Specific Overrides
+
+
+
+Textarea:
+
+Override min-height, max-height, resize direction independently from global textarea settings
+
+Custom Select:
+
+Override trigger box, panel, and option-item colors independently per field
+
+Override panel animation style for this specific dropdown
+
+Radio Group:
+
+Override checked fill color, unchecked border, layout direction (row/column), gap
+
+Checkbox Group:
+
+Override checked background, border radius (square vs rounded), checkmark color, animation style
+
+Date Picker:
+
+Override calendar icon color and calendar panel colors
+
+File Upload:
+
+Override drop zone background, border style, file chip color
+
+Rating:
+
+Override icon type, size, selected/unselected colors for this field only
+
+Section Heading (divider):
+
+Font size, weight, color, text transform, margin top/bottom, border bottom (separator line style/color/width)
+
+Consent Checkbox:
+
+Override link text color, link underline, legal text font size and color independently from global label
+
+
+
+6. Advanced — Raw Custom CSS (Growth Plan)
+
+Available at both Form level and individual Field level for merchants on the Growth plan. The raw CSS textarea accepts any valid CSS, automatically scoped to the unique block/field ID to prevent it bleeding outside the form. A syntax-highlighted code editor is shown in the Theme Editor sidebar.
+
+
+
+Form-level raw CSS: scoped to #fbw-{blockId} — applies to the entire form and all its children
+
+Field-level raw CSS: scoped to #fbw-{blockId} .fbw-field-{fieldId} — applies only to that one field
+
+CSS variables (custom properties): all design tokens are exposed as --fbw-* CSS variables so merchants can override one value and have it cascade automatically
+
+Syntax: standard CSS — no SCSS, no nesting (CSS nesting will be supported when browser support matures)
+
+Live preview updates in real-time as the merchant types (debounced 300 ms)
+
+Note: Custom CSS is not validated for safety (it runs in the storefront). Malicious input can only affect the merchant's own storefront. This is standard practice for Shopify theme customization.
+
+
+
+7. Interactive State Coverage Summary
+
+The following CSS states are covered at both global and field-level, surfaced via the state-switch control in the sidebar:
+
+
+
+State
+
+CSS Pseudo-class
+
+Applies to
+
+Hover
+
+:hover
+
+Inputs, Textarea, Select trigger, Options, Checkboxes, Radios, Button, File zone
+
+Focus
+
+:focus / :focus-visible
+
+Inputs, Textarea, Select trigger, Checkboxes, Radios, Button
+
+Active (pressed)
+
+:active
+
+Button, Checkboxes, Radios
+
+Error
+
+[data-error]
+
+Inputs, Textarea, Select trigger, Checkboxes, Radios
+
+Disabled
+
+:disabled / [disabled]
+
+All interactive elements
+
+Checked
+
+:checked
+
+Checkboxes, Radios, Rating icons
+
+Placeholder visible
+
+:placeholder-shown
+
+Fields where custom span placeholder is visible
+
+File drag-over
+
+[data-dragover]
+
+File Upload drop zone
+
+Open (dropdown)
+
+[data-open]
+
+Custom Select trigger and panel
+
+Selected option
+
+[data-selected]
+
+Custom Select option items
+
+
+
+8. Items Not Yet Mentioned — Recommended Additions
+
+The following are styling system concerns not explicitly listed in the brief but required for a complete, professional-grade form builder:
+
+
+
+8.1  CSS Custom Properties (Design Token Panel)
+
+All style values should write to CSS custom properties (--fbw-*) on the block root element, not hard-coded inline styles
+
+This allows merchants to use the same variable in multiple places and change it in one click
+
+Expose a "Tokens" view in the Advanced section showing all variable names for developer reference
+
+8.2  Responsive Breakpoints
+
+Every sizing property (height, padding, font-size, etc.) should have Mobile and Desktop tabs in the sidebar
+
+Mobile styles use a CSS @media query — no extra work for merchants, controlled by the same picker
+
+8.3  Dark Mode Support
+
+Each color control exposes a "Dark mode variant" — shown as a secondary color swatch next to the main one
+
+Dark mode colors write to a [data-color-scheme="dark"] or @media (prefers-color-scheme: dark) scoped rule
+
+8.4  Form Animation / Entrance Effects
+
+Scroll-triggered or load-triggered entrance for the form container: Fade in / Slide up / None
+
+Animation duration + delay + easing for the container entrance
+
+8.5  Multi-Step Navigation Buttons
+
+"Next" and "Back" buttons in multi-step forms need independent styling from the Submit button
+
+Same full button style set from Section 4.14, but as a separate "Navigation Buttons" group
+
+8.6  Required Field Indicator
+
+Asterisk (*) or custom symbol color and position (after label vs before label)
+
+Option to show "required" / "optional" text badge instead of asterisk
+
+8.7  Character Count / Counter Display
+
+Text color, font size, alignment, and position (below input vs inline right) for the character counter
+
+8.8  Inline Validation Styling
+
+Success state (green border + checkmark) separate from the error state — for real-time validation feedback
+
+Success checkmark icon color and size
+
+8.9  Field Focus Order / Tab Highlight
+
+High-visibility focus ring for accessibility — separate from the hover state, controlled independently
+
+Focus ring color, width, offset, style (solid / dashed / glow)
+
+8.10  Print Styles
+
+A "Print-friendly mode" toggle that strips backgrounds, shadows, and colors for clean printing
+
+
+
+9. Plan Gating for Styling Features
+
+
+
+Feature
+
+Free
+
+Starter
+
+Growth
+
+Global form & field styling (all visual controls)
+
+✅
+
+✅
+
+✅
+
+Placeholder animation styles
+
+✅
+
+✅
+
+✅
+
+Custom Select animations (panel open)
+
+✅
+
+✅
+
+✅
+
+Hover / Focus / Error states styling
+
+✅
+
+✅
+
+✅
+
+Field-level style overrides
+
+✅
+
+✅
+
+✅
+
+Responsive (mobile/desktop) breakpoints
+
+❌
+
+✅
+
+✅
+
+Dark mode color variants
+
+❌
+
+✅
+
+✅
+
+Form entrance animation
+
+❌
+
+✅
+
+✅
+
+Raw Custom CSS (form-level)
+
+❌
+
+❌
+
+✅
+
+Raw Custom CSS (field-level)
+
+❌
+
+❌
+
+✅
+
+CSS Custom Properties token panel
+
+❌
+
+❌
+
+✅
+
+Remove "Powered by" branding
+
+❌
+
+❌
+
+✅
+
+
+
+10. Implementation Notes (UX/Architecture)
+
+All styling controls are Shopify native settings_schema entries — no custom sidebar UI is required. This ensures future compatibility with Shopify updates.
+
+CSS is generated at render time on the storefront by the app's Liquid/JS runtime, converting the stored settings into a <style> block scoped to the form block ID.
+
+Every color control supports transparency/alpha via a color picker with an opacity slider.
+
+Linked/unlinked padding controls: a small chain-link icon lets merchants lock all four sides together or break them individually — this is the same UX as native Shopify section spacing controls.
+
+The sidebar state-switcher (Default | Hover | Focus | Error | Disabled) is a custom Theme Editor block action bar rendered above the standard settings controls.
+
+Placeholder spans are positioned via position: absolute inside a position: relative wrapper on the field, with z-index managed to not overlap real text.
+
+Custom Select triggers a custom [data-open] attribute toggle, allowing CSS-only open/close animation without a JS transition API, which keeps animations hardware-accelerated via transform and opacity.
+
+All animation durations exposed in the sidebar write to CSS custom properties, meaning a single --fbw-transition-duration variable controls every transition in the form when set globally.
+
+
+
+
+
+Custom Form Builder — Form Design & Styling PRD  |  v1.0  |  Confidential
+

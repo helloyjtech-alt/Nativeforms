@@ -1,0 +1,1678 @@
+
+
+PRODUCT REQUIREMENTS DOCUMENT
+
+Admin Dashboard
+
+Custom Form Builder — Shopify App
+
+Version 1.0  ·  All Pages & Features  ·  Including Billing & Plans
+
+
+
+
+
+1.  Purpose & Scope
+
+This document defines every page, module, component, user interaction, and feature gate inside the Custom Form Builder embedded Admin Dashboard. The Dashboard lives inside Shopify's Admin chrome (App Bridge v3 + Polaris), not in a separate browser window. Its purpose is management and visibility — form construction happens entirely in the Shopify Theme Editor and is never duplicated here.
+
+What this PRD covers:
+
+Every named page and sub-page in the left navigation
+
+Every UI component on each page — tables, cards, charts, modals, drawers, banners
+
+Every user action — clicks, filters, exports, bulk operations
+
+Every plan-gate — which features are Free / Starter / Growth
+
+The Billing & Plans page in full detail
+
+Empty states, error states, over-limit banners
+
+Notification and alert flows triggered from the Dashboard
+
+
+
+2.  Global Navigation & Shell
+
+The App loads inside Shopify's embedded Admin frame. The left-rail navigation (Polaris Navigation component) contains these top-level items in order:
+
+
+
+Nav Label
+
+Icon
+
+Destination / Notes
+
+Dashboard
+
+Home / grid icon
+
+Overview metrics, activity chart, quick links
+
+Forms
+
+List / document icon
+
+All forms table. Primary link from all other pages
+
+Submissions
+
+Inbox / tray icon
+
+Global submissions inbox across all forms
+
+Notifications
+
+Bell icon
+
+Email templates — merchant alert + auto-responder
+
+Integrations
+
+Plug / connect icon
+
+Third-party integrations (Growth plan)
+
+Billing & Plan
+
+Credit card icon
+
+Plan cards, usage meters, upgrade/downgrade
+
+Settings
+
+Gear icon
+
+App-level preferences, spam settings, data retention
+
+Help & Support
+
+Question mark
+
+Help centre link, contact form, changelog
+
+
+
+Global shell elements present on every page:
+
+Top bar — App name + logo left, merchant store name right, "Open Theme Editor" shortcut button top-right
+
+Plan badge — small coloured pill in the nav rail (FREE / STARTER / GROWTH) always visible
+
+Over-limit banner — full-width amber banner appears above all page content when submission cap is exceeded. Contains a count of held submissions and an "Upgrade now" CTA. Dismissible per session, reappears on next login.
+
+Trial countdown banner — shown when a paid trial is active. "X days remaining on your Starter trial." Links to Billing page. Dismisses after plan is confirmed.
+
+
+
+3.  Page: Dashboard Overview
+
+Route: /  (app root). The landing page after install and every subsequent login. All plan tiers see this page; some metric cards are degraded on Free.
+
+
+
+3.1  Metric Cards Row
+
+Four stat cards in a horizontal row (2x2 on mobile). Each card shows: large number, label, period label ("last 30 days"), and a small trend indicator (up/down arrow with %, green/red).
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Total Forms
+
+Count of all non-deleted forms (Active + Draft + Archived). Tapping the card navigates to the Forms page.
+
+All plans
+
+Submissions This Period
+
+Count of submissions received in the current billing period. Shows "X / Y cap" on Free and Starter. Clicking opens the global Submissions inbox filtered to this period.
+
+All plans
+
+Form Views (Impressions)
+
+Total times any published form was loaded by a visitor this period. Source: Analytics table beacons.
+
+All plans
+
+Conversion Rate
+
+Submissions / Views x 100, averaged across all active forms for the period.
+
+All plans
+
+
+
+3.2  Submissions Activity Chart
+
+Line chart (Recharts / Polaris Charts). X-axis: date. Y-axis: submission count. Three toggle buttons above the chart: 7 Days / 30 Days / 90 Days. Each form is a separate coloured line; a legend maps colour to form name. Hovering a data point shows a tooltip: date, form name, submission count for that day.
+
+If merchant has 0 forms: chart area is replaced by an empty-state illustration with "Add your first form in the Theme Editor" + button.
+
+If all forms have 0 submissions: chart renders with flat zero line + "No submissions yet" overlay label.
+
+
+
+3.3  Recent Submissions Feed
+
+A list of the 5 most recent submissions across all forms. Each row shows: Status dot (Unread = blue, Read = grey), Submitter name/email (first value that looks like a name/email), Form name, Time ago ("2 hours ago"), and a "View" link. Clicking "View" opens the Submission Detail drawer (Section 5.3). A "View all submissions" link at the bottom navigates to the Submissions page.
+
+
+
+3.4  Quick-Start Cards (new installs only)
+
+Shown above the metric cards for the first 7 days after install, or until the merchant dismisses them. Three cards in a row:
+
+Add your first form — "Open Theme Editor" deep-link button. Card disappears after the first form is created.
+
+Set up notifications — links to Notifications page. Card disappears after a notification email is saved.
+
+Explore templates — links to the Template Gallery (opens in Theme Editor context). Always dismissible manually.
+
+
+
+
+
+4.  Page: Forms
+
+Route: /forms. A read-only management workspace. Forms are created exclusively in the Theme Editor; this page is where merchants manage their forms after creation.
+
+
+
+4.1  Page Header
+
+Title: "Forms". Subtitle: "Your forms are created and edited in the Theme Editor." A prominent "Open Theme Editor" button in the top-right of the header (primary action). Below the subtitle: an informational banner (dismissible, shown once): "To create a form, go to the Theme Editor > Add section > Apps > Custom Form Builder."
+
+
+
+4.2  Toolbar — Filters & Search
+
+Above the data table:
+
+Search input — real-time filter on Form name.
+
+Status filter chips — All / Active / Draft / Archived (multi-select).
+
+Sort dropdown — Newest / Oldest / Most submissions / Alphabetical.
+
+Bulk action bar — appears when 1 or more rows are checked: "Archive selected" / "Delete selected" with confirmation modal.
+
+
+
+4.3  Forms Data Table
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Checkbox
+
+Row selector for bulk actions. Header checkbox selects all visible rows.
+
+All plans
+
+Form Name
+
+Clickable — navigates to Form Detail page (Section 4.5). Truncated at 40 chars with tooltip.
+
+All plans
+
+Status Badge
+
+Pill badge: Active (green) / Draft (grey) / Archived (orange).
+
+All plans
+
+Fields
+
+Count of field blocks on this form.
+
+All plans
+
+Submissions
+
+Total lifetime submission count. Clickable — navigates to Submissions page filtered to this form.
+
+All plans
+
+Views
+
+Total lifetime form impression count from Analytics table.
+
+All plans
+
+Conv. Rate
+
+Submissions / Views for lifetime. Shown as "—" if 0 views.
+
+All plans
+
+Created
+
+Creation date. Tooltip shows exact timestamp.
+
+All plans
+
+Actions (…)
+
+3-dot menu: Edit in Theme Editor / View Submissions / Duplicate / Archive / Delete.
+
+All plans
+
+
+
+Table is paginated: 20 rows per page. Pagination controls at the bottom (Previous / Page N of M / Next).
+
+Plan-limit banner: when a Free merchant has 2 forms, a row at the bottom of the table reads: "You've reached the 2-form limit on the Free plan. Upgrade to Starter to create up to 10 forms." with an Upgrade button.
+
+
+
+4.4  Row Actions — Detail
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Edit in Theme Editor
+
+Deep-link: opens Shopify Theme Editor focused on this form's App Block. Uses the stored themeBlockId.
+
+All plans
+
+View Submissions
+
+Navigates to Submissions page, pre-filtered to this form.
+
+All plans
+
+Duplicate Form
+
+Creates a copy of the form + its fields in the DB (Draft status). Does NOT write to Theme Editor. Merchant must then add a new block in the editor and will see the duplicate form available. A success toast confirms the copy.
+
+All plans — but blocked if at plan form limit
+
+Archive
+
+Sets status = ARCHIVED. Form is hidden from storefront. Reversible from Archived filter view. Confirmation modal with count of submissions that will be retained.
+
+All plans
+
+Delete
+
+Permanent. Two-step confirmation modal: "Type the form name to confirm deletion." Cascades to all submissions and field records.
+
+All plans
+
+
+
+4.5  Form Detail Page
+
+Route: /forms/:id. Accessed by clicking the form name in the table. Four tabs across the top:
+
+
+
+Tab A: Overview & Analytics
+
+Form info card — Name, Status badge, Created date, Theme block ID, Field count. "Edit in Theme Editor" primary button.
+
+Analytics mini-chart — 30-day submission + view line chart specific to this form. Same 7/30/90 day toggles.
+
+Stat row — Total submissions, Total views, Conversion rate, Avg. submissions/day.
+
+
+
+Tab B: Submissions
+
+Same Submissions data grid as Section 5 but pre-filtered to this form. Includes search, status filter, date range filter, and CSV export — all scoped to this form.
+
+
+
+Tab C: Notification Settings
+
+Per-form email configuration (overrides the global Notifications defaults for this specific form):
+
+Merchant alert email — text input for the recipient address. Default pulls from global Settings. "Send to multiple" — comma-separated.
+
+Reply-to field — sets the Reply-To header so merchant can reply directly to the submitter.
+
+Email subject line — text input. Supports variables: {{form.title}}, {{submission.id}}, {{date}}.
+
+Merchant alert email body — rich text editor with variable picker. Available variables: {{form.title}}, {{submission.id}}, {{submission.date}}, {{fields.*}} for each field. "Preview" button renders a live HTML preview in a modal.
+
+Customer auto-responder toggle — ON/OFF. When ON:
+
+Email address field to pull from — dropdown of all Email-type fields on this form.
+
+Auto-responder subject — text input with variable support.
+
+Auto-responder body — rich text editor with variable picker.
+
+Preview button.
+
+"Send test email" button — fires a test alert to the configured merchant address with dummy field values. Shows a success/error toast.
+
+Plan gate: auto-responder requires Starter+. On Free, the auto-responder section is visible but controls are locked with an "Upgrade to Starter" inline upsell.
+
+
+
+Tab D: Danger Zone
+
+Archive this form — same as table row action. Amber confirmation banner.
+
+Delete this form — red "Delete" button. Two-step modal: shows submission count that will be permanently deleted, requires typing form name to confirm.
+
+Export all submissions — exports all submissions for this form as CSV. Bypasses the inbox filter.
+
+
+
+
+
+5.  Page: Submissions
+
+Route: /submissions. The global inbox for all form submissions across all forms. This is the merchant's primary working tool for reviewing customer entries.
+
+
+
+5.1  Toolbar — Filters & Search
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Search bar
+
+Full-text search across all field values (name, email, text). Debounced 300ms. Server-side. Shows result count.
+
+All plans
+
+Form filter
+
+Dropdown — All Forms / [individual form names]. Single-select.
+
+All plans
+
+Status filter
+
+Multi-select chips: All / Unread / Read / Archived / Spam.
+
+All plans
+
+Date range filter
+
+Date picker: Today / Last 7 days / Last 30 days / This billing period / Custom range.
+
+All plans
+
+Export CSV
+
+Exports current filter result as CSV. Column headers = all unique field labels across filtered forms. Null for missing fields. Max 10,000 rows per export on Growth; 1,000 on Starter; 100 on Free.
+
+All plans (row caps vary)
+
+Export Excel (.xlsx)
+
+Same as CSV but XLSX format.
+
+Starter+
+
+Bulk mark as Read
+
+Available when 1 or more rows selected.
+
+All plans
+
+Bulk Archive
+
+Available when 1 or more rows selected.
+
+All plans
+
+Bulk Mark as Spam
+
+Moves to Spam filter. Optionally blocks the submitter IP. Confirmation modal.
+
+All plans
+
+Bulk Delete
+
+Permanent. Requires confirmation.
+
+All plans
+
+
+
+5.2  Submissions Table
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Checkbox
+
+Row selector for bulk actions.
+
+All plans
+
+Status dot
+
+Blue = Unread, Grey = Read, Orange = Archived, Red = Spam, Amber dot + lock = isOverLimit (held pending upgrade).
+
+All plans
+
+Submitter
+
+Best-guess display: first Email field value, or first Text field value. Falls back to "Anonymous." Click to open Submission Detail drawer.
+
+All plans
+
+Form
+
+Name of the form this submission came from. Clickable — navigates to Form Detail.
+
+All plans
+
+Date
+
+Relative ("2 hours ago") with exact timestamp on hover.
+
+All plans
+
+Preview
+
+First 60 characters of the first meaningful text field value.
+
+All plans
+
+Actions (…)
+
+Mark as Read / Mark as Unread / Archive / Mark as Spam / Delete.
+
+All plans
+
+
+
+Pagination: 25 rows per page (configurable 10/25/50 in Settings). Infinite scroll option available on desktop.
+
+Over-limit rows: Submissions flagged isOverLimit are shown in the table with a lock icon and amber background. A column-level banner above these rows reads: "These submissions were received while your plan was over its limit. Upgrade to unlock delivery of held notifications." Clicking the banner opens the Billing page.
+
+
+
+5.3  Submission Detail Drawer
+
+Opens as a right-side drawer (Polaris Sheet) when the merchant clicks any row. Never navigates away from the Submissions page — the table remains visible in the background.
+
+Header — Submitter identifier, Form name, Submission date, Status badge. Actions row: Mark Read | Archive | Spam | Delete.
+
+Field values panel — Each field shown as: Label (grey small caps) + Value. File upload fields show a "Download file" link. Long text fields are expandable.
+
+Metadata section (collapsible) — Submission ID, IP address (last octet masked for privacy unless Growth), User agent string, Source URL.
+
+Navigation — Previous / Next submission arrows at the top of the drawer, maintaining the current filter context.
+
+Reply CTA (Starter+) — If the submission contains an email field, a "Reply by email" button opens the merchant's default mail client with the submitter's email pre-filled in the To: field.
+
+
+
+
+
+6.  Page: Notifications
+
+Route: /notifications. Global default email templates. These are overridden per-form in the Form Detail > Notification Settings tab. This page sets the baseline.
+
+
+
+6.1  Merchant Alert Email (Global Default)
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Default recipient address
+
+Text input. Pre-filled with the store owner's email on install. Accepts comma-separated addresses.
+
+All plans
+
+Reply-To
+
+Global default Reply-To. Per-form settings override this.
+
+All plans
+
+Email subject template
+
+Text with variables. Default: "New {{form.title}} submission — {{date}}"
+
+All plans
+
+Email body editor
+
+Rich text (WYSIWYG). Variable picker button inserts {{field.*}} tokens. Toolbar: bold, italic, headings, bullet list, link.
+
+All plans
+
+Live preview
+
+Side-by-side or toggle view rendering the HTML email with sample data.
+
+All plans
+
+Send test email
+
+Fires a test to the configured recipient(s) with placeholder values. Toast confirms sent/failed.
+
+All plans
+
+Save button
+
+Saves global defaults. Form-level overrides are not affected.
+
+All plans
+
+
+
+6.2  Customer Auto-Responder (Global Default)
+
+Plan gate: Starter and Growth only. On Free this section is visible but locked. An inline upsell card explains the feature and links to the Billing page.
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Enable auto-responder (global)
+
+Toggle — ON/OFF. When OFF, no auto-responder is sent for any form unless the form has a per-form override that turns it ON.
+
+Starter+
+
+From name
+
+The "From" display name. Default: store name.
+
+Starter+
+
+From email
+
+The sending address. Must be verified with the email provider. Helper text explains verification.
+
+Starter+
+
+Subject template
+
+Text with variable picker. Default: "We received your {{form.title}} — here's what you sent us."
+
+Starter+
+
+Body editor
+
+Rich text editor with variable picker. Recommended to include {{submission_values}} block which auto-renders the submitted field list.
+
+Starter+
+
+Preview + Test send
+
+Same as merchant alert above.
+
+Starter+
+
+
+
+6.3  Email Variable Reference Panel
+
+A collapsible reference panel on the right side of the page (or below on mobile). Lists all available template variables with descriptions:
+
+{{form.title}} — Name of the form
+
+{{submission.id}} — Unique submission ID
+
+{{submission.date}} — Date and time of submission
+
+{{submission.source_url}} — Page URL where the form was submitted
+
+{{customer.email}} — Value of any field of type Email (first one found)
+
+{{customer.name}} — Value of first field whose label contains "name" (case-insensitive)
+
+{{fields.*}} — All field values as a formatted list
+
+{{fields.field_label}} — Specific field value by label slug
+
+{{shop.name}} — Shopify store name
+
+{{shop.url}} — Shopify store URL
+
+
+
+
+
+7.  Page: Integrations
+
+Route: /integrations. Growth plan only. On Free and Starter: the page is accessible but all integration cards show a locked state with an "Upgrade to Growth" CTA. The page title includes a Growth badge.
+
+
+
+7.1  Integration Cards Grid
+
+Displayed as a grid of cards (3 per row on desktop, 1 on mobile). Each card: Logo + Integration name, One-line description, Status badge (Not connected / Connected in green), and "Connect" or "Configure" button.
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Klaviyo
+
+Send each new submission as a Klaviyo event. Map form fields to Klaviyo profile properties. Supports list subscription.
+
+Growth
+
+Mailchimp
+
+Add submitter to a Mailchimp audience. Map fields to merge tags.
+
+Growth
+
+Google Sheets
+
+Append each submission as a new row to a selected Google Sheet. OAuth connection.
+
+Growth
+
+Zapier
+
+Webhook to Zapier. Sends full submission payload as JSON. One webhook URL per form or global.
+
+Growth
+
+Make (Integromat)
+
+Webhook to Make scenario. Same mechanism as Zapier.
+
+Growth
+
+Slack
+
+Post a Slack notification to a channel on each new submission. Configurable message template.
+
+Growth
+
+ConvertKit
+
+Subscribe submitter to a ConvertKit sequence. Map email field.
+
+Growth (roadmap)
+
+HubSpot
+
+Create or update a HubSpot contact. Map fields to contact properties.
+
+Growth (roadmap)
+
+
+
+7.2  Integration Configuration Drawer
+
+Clicking "Connect" or "Configure" on any card opens a right-side drawer:
+
+Step 1 — Authentication. OAuth button or API key input depending on the integration. Connection status shows after auth.
+
+Step 2 — Scope: All Forms or select specific forms from a dropdown.
+
+Step 3 — Field Mapping. Table of integration destination fields (left) mapped to form field selectors (right). "Auto-map" button attempts to match by label.
+
+Step 4 — Test. "Send test payload" fires a sample submission to the integration and shows the response. Green tick on success.
+
+Save / Disconnect buttons at the bottom.
+
+
+
+
+
+8.  Page: Billing & Plan
+
+Route: /billing. The most critical conversion page in the app. It must be clear, honest, and frictionless. Accessible from the nav, from the Plan badge, and from any upgrade CTA across the app.
+
+
+
+8.1  Current Plan Summary Card
+
+Displayed at the top of the page, above the plan comparison grid:
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Current plan label
+
+Large text: "You're on the FREE plan" (or STARTER / GROWTH). Plan name in matching badge colour.
+
+All plans
+
+Billing cycle
+
+Monthly or Annual. Renewal date shown: "Renews on [date]." If on Free: not shown.
+
+Starter+
+
+Trial countdown
+
+If in trial: "X days remaining in your free trial. No charge until [date]."
+
+Starter+
+
+Annual discount nudge
+
+If on monthly Starter/Growth: "Switch to annual billing and save ~20% — that's $X/yr."
+
+Starter+
+
+Manage subscription link
+
+Links to Shopify's subscription management page (external).
+
+Starter+
+
+
+
+8.2  Usage Meters
+
+Directly below the current plan card. Two or three horizontal progress bar meters:
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Forms used
+
+Bar: X of Y forms used. Y = plan cap (2 / 10 / Unlimited). On Growth: bar is not shown ("Unlimited"). Bar turns amber at 80%, red at 100%.
+
+All plans
+
+Submissions this period
+
+Bar: X of Y submissions this billing period. Y = plan cap (50 / 1,000 / 10,000). Resets on billing renewal date. Shows renewal date below bar. Bar turns amber at 80%, red at 100%. At 100%: red bar + "X submissions held — upgrade to deliver them."
+
+All plans
+
+File storage used
+
+Bar: X MB of Y MB. Only shown if the plan includes file uploads and at least one file has been uploaded.
+
+Starter+
+
+
+
+8.3  Plan Comparison Cards
+
+Three plan cards side-by-side (stacked on mobile). The merchant's current plan has a highlighted border (blue) and a "Current plan" badge. The other plans show upgrade/downgrade actions.
+
+
+
+FREE
+
+STARTER — $5.99/mo
+
+GROWTH — $13.99/mo
+
+$0 / month
+
+$5.99/mo · $57.50/yr (save 20%)
+
+$13.99/mo · $134.30/yr (save 20%)
+
+2 published forms
+
+10 published forms
+
+Unlimited forms
+
+50 submissions/mo
+
+1,000 submissions/mo
+
+10,000 submissions/mo
+
+Core field types
+
+All fields (excl. Rating)
+
+All fields incl. Rating/NPS
+
+5 starter templates
+
+Full template library (30+)
+
+Full template library (30+)
+
+"Form by [App]" branding shown
+
+Branding removable
+
+Branding removable
+
+—
+
+File uploads (5MB/file)
+
+File uploads (10MB/file)
+
+—
+
+Customer auto-responder
+
+Customer auto-responder
+
+—
+
+—
+
+Conditional logic
+
+—
+
+—
+
+Klaviyo, Mailchimp, Zapier, Sheets, Slack
+
+—
+
+Responsive breakpoints styling
+
+Custom CSS + CSS tokens
+
+Honeypot spam protection
+
+Honeypot spam protection
+
+Honeypot + reCAPTCHA v3
+
+Help centre only
+
+Email support
+
+Priority chat support
+
+Current plan (example state)
+
+7-day free trial · Start Starter Trial
+
+7-day free trial · Start Growth Trial
+
+
+
+Monthly / Annual toggle: a billing cycle toggle above the plan cards switches the prices shown. Annual prices recalculate instantly. The CTA button text also updates: "Start Starter Trial (Annual)" etc.
+
+
+
+8.4  Upgrade / Downgrade Flow
+
+Upgrade CTA button on the plan card triggers: App Backend -> appSubscriptionCreate (Shopify Billing API) -> merchant redirected to Shopify's hosted billing confirmation page -> on approval, redirect back to /billing?upgraded=true -> success banner "You're now on [PLAN]. Your new features are active."
+
+Annual switch: same flow as upgrade but with ANNUAL interval.
+
+Downgrade: shows a modal listing features that will be lost and any forms/submissions that will be affected (e.g. "2 forms will be archived as you'll exceed the Free limit"). Requires merchant to type "DOWNGRADE" to confirm. Downgrade is processed at end of current billing period, not immediately.
+
+Cancellation: "Cancel subscription" link at the bottom of the current plan card. Confirmation modal. Subscription ends at period end, plan reverts to Free. Forms above Free cap are archived, not deleted.
+
+
+
+8.5  Invoice History
+
+Table below the plan cards. Columns: Date, Description ("Starter Monthly"), Amount, Status (Paid / Failed / Refunded), PDF link. Data pulled from Shopify's appSubscription billing records. Paginated 10 per page. "Download all as PDF" at the top of the table. If no invoices: "No billing history yet."
+
+
+
+
+
+9.  Page: Settings
+
+Route: /settings. App-wide preferences that apply globally unless overridden at the form or notification level.
+
+
+
+9.1  General Settings
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Default notification email
+
+Pre-filled with store owner email on install. Used as the merchant alert recipient for all forms that don't have a per-form override.
+
+All plans
+
+Time zone
+
+Dropdown — used for date display in submissions and analytics. Defaults to shop's Shopify time zone.
+
+All plans
+
+Date format
+
+Select: DD/MM/YYYY / MM/DD/YYYY / YYYY-MM-DD.
+
+All plans
+
+Submission page size
+
+Default rows shown per page in Submissions table: 10 / 25 / 50.
+
+All plans
+
+
+
+9.2  Spam Protection
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Honeypot protection
+
+Always ON. Not configurable. Explained here for merchant transparency.
+
+All plans
+
+reCAPTCHA v3
+
+Toggle: Enable / Disable. When enabled, a reCAPTCHA site key and secret key input appear (merchant must register their own keys at Google). Alternatively: "Use shared keys" (Growth plan includes shared keys — lower privacy, simpler setup).
+
+Growth
+
+IP rate limit (per minute)
+
+Slider: 1-20 submissions per IP per minute. Default 5. Applies to all forms globally.
+
+All plans
+
+Block list (IP / email)
+
+Textarea: one IP or email per line. Submissions from these are silently discarded (fake success returned to the bot/spammer).
+
+All plans
+
+
+
+9.3  Data Retention
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Submission retention period
+
+Select: Forever / 1 year / 6 months / 3 months / 30 days. Older submissions are permanently deleted by a nightly job. Default: Forever. Shows a warning when changed to a shorter window.
+
+All plans
+
+Anonymise IP addresses
+
+Toggle. When ON, the last octet of stored IPs is masked to 0. Useful for GDPR compliance.
+
+All plans
+
+Auto-delete spam
+
+Toggle. When ON, submissions marked Spam are permanently deleted after 30 days.
+
+All plans
+
+GDPR data export
+
+Button: "Export all data." Downloads a ZIP containing all submissions as CSV, all form configs as JSON, and a README. Used for Subject Access Requests.
+
+All plans
+
+Delete all data
+
+Red "Delete all data" button. Two-step: type store domain to confirm. Purges all forms, fields, submissions, and analytics. Cannot be undone. (Store record is retained for billing compliance until Shopify shop/redact fires.)
+
+All plans
+
+
+
+9.4  Branding
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Remove "Powered by" footer
+
+Toggle. When OFF (default Free), a small "Form by [App Name]" text appears below the submit button on the storefront. When ON: the branding is removed.
+
+Starter+
+
+Custom branding text
+
+When branding is shown (Free), this is fixed text — merchants cannot customise it on Free.
+
+Free: read-only. Starter+: toggle to remove
+
+
+
+
+
+10.  Page: Help & Support
+
+Route: /help.
+
+
+
+10.1  Content Sections
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Quick Start Guide
+
+Three-step visual guide: 1. Install & Open Theme Editor, 2. Add Form Block, 3. View submissions. Each step has a 1-sentence description and a "Go" link.
+
+All plans
+
+Help Centre link
+
+External link button: "Browse Help Articles." Opens app's documentation site in a new tab.
+
+All plans
+
+Video tutorials
+
+Embedded or linked: short screen-recordings for common tasks (add a form, use a template, set up notifications, upgrade plan).
+
+All plans
+
+Contact support
+
+Form: Name, Email (pre-filled from store), Subject dropdown (Billing / Bug report / Feature request / Other), Message textarea. Submit posts to the support ticket system. Response time shown: "We typically reply within 24 hours" (2 hours for Growth).
+
+All plans
+
+Changelog
+
+Accordion list of app version release notes, newest first. Each entry: version number, date, bullet list of changes.
+
+All plans
+
+App Store Review CTA
+
+"Enjoying the app? Leave us a review" — soft prompt, shown only after merchant has been active 14+ days and has at least 1 submission.
+
+All plans
+
+
+
+
+
+11.  Onboarding Flow (Post-Install)
+
+The first-run experience after OAuth install. Designed to get the merchant to their first live form in under 3 minutes.
+
+
+
+11.1  Steps
+
+
+
+Onboarding Step
+
+What Happens
+
+Step 1 — Welcome screen
+
+Full-width welcome card. App name, one-sentence value prop. Three quick-start cards (Section 3.4). "Get started" button scrolls to metric cards.
+
+Step 2 — Merchant clicks "Add your first form"
+
+Backend calls themeFilesUpsert to inject an empty Form block into the current published theme. Deep-link to Theme Editor is opened. A "You're almost there" toast shows in the Admin.
+
+Step 3 — Inside Theme Editor
+
+The merchant sees the empty Form block with the design-mode gallery overlay (handled by the theme extension, not the Admin). They choose a template or start blank.
+
+Step 4 — Back in Admin
+
+Once the form is saved in the Theme Editor and the merchant returns, the Dashboard refreshes. The form appears in the Forms table. Quick-start cards begin collapsing as tasks are completed.
+
+Step 5 — Notifications prompt
+
+Second quick-start card links to /notifications. A guided tooltip draws attention to the "Default recipient email" field.
+
+Step 6 — Completion
+
+After 3 tasks complete (form created, notification saved, first submission received), a "You're set up!" banner replaces the quick-start cards. Includes a one-click "Upgrade to Starter" nudge.
+
+
+
+
+
+12.  Global States, Banners & Error Handling
+
+
+
+12.1  System-Wide Banners
+
+
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Over submission limit
+
+Amber. "X submissions are being held because you've exceeded your plan's monthly limit. Upgrade now to deliver them and raise your cap." Appears on all pages. Dismissible per session.
+
+Free & Starter
+
+Trial expiring (3 days or less)
+
+Blue. "Your free trial ends in X days. Add a payment method to keep your [PLAN] features." Action: "Manage billing."
+
+Starter+
+
+Trial expired
+
+Red. "Your free trial has ended. You've been moved to the Free plan. Upgrade to restore access to [features list]."
+
+Starter+
+
+Payment failed
+
+Red. "Your last payment failed. Please update your billing details to avoid service interruption." Links to Shopify subscription management.
+
+Starter+
+
+App update available
+
+Grey. "A new version of [App] is available with [feature]. Learn what's new."
+
+All plans
+
+
+
+12.2  Empty States
+
+Feature / Element
+
+Description & Behaviour
+
+Plan Gate
+
+No forms yet
+
+Dashboard + Forms page: illustration, "You haven't created any forms yet." Button: "Open Theme Editor."
+
+All plans
+
+No submissions yet
+
+Submissions page: illustration, "No submissions received yet. Share your form link or add it to a page."
+
+All plans
+
+No results for filter
+
+Submissions table: "No submissions match your search or filters." Button: "Clear filters."
+
+All plans
+
+Integration not connected
+
+Integrations card: lock icon if on Free/Starter, otherwise "Connect [integration] to get started." Button in card.
+
+Varies
+
+
+
+12.3  Toast Notifications
+
+Polaris Toast component. Appears bottom-left, auto-dismisses after 4 seconds. Used for:
+
+Successful saves (Settings saved, Email template saved, Integration connected)
+
+Successful destructive actions (Form archived, Submission deleted)
+
+Test email sent / Test email failed
+
+Export started / Export ready (with download link)
+
+Plan upgrade confirmed / Plan downgrade scheduled
+
+
+
+
+
+13.  Complete Feature Gate Matrix
+
+Consolidated reference showing plan availability of every Admin Dashboard feature:
+
+
+
+Feature
+
+FREE
+
+STARTER
+
+GROWTH
+
+Dashboard overview (metrics, chart, feed)
+
+Yes
+
+Yes
+
+Yes
+
+Forms table — view, archive, delete
+
+Yes
+
+Yes
+
+Yes
+
+Edit form in Theme Editor (deep-link)
+
+Yes
+
+Yes
+
+Yes
+
+Duplicate form
+
+Yes (if under plan limit)
+
+Yes
+
+Yes
+
+Form detail analytics (per-form chart)
+
+Yes
+
+Yes
+
+Yes
+
+Published forms cap
+
+2 forms
+
+10 forms
+
+Unlimited
+
+Global submissions inbox
+
+Yes
+
+Yes
+
+Yes
+
+Submission detail drawer
+
+Yes
+
+Yes
+
+Yes
+
+Search & filter submissions
+
+Yes
+
+Yes
+
+Yes
+
+Submissions per billing period
+
+50
+
+1,000
+
+10,000
+
+Export CSV (rows per export)
+
+100 rows
+
+1,000 rows
+
+10,000 rows
+
+Export Excel (.xlsx)
+
+No
+
+Yes
+
+Yes
+
+Reply-by-email CTA in drawer
+
+No
+
+Yes
+
+Yes
+
+Bulk submission operations
+
+Yes
+
+Yes
+
+Yes
+
+Merchant alert email (global + per-form)
+
+Yes
+
+Yes
+
+Yes
+
+Customer auto-responder
+
+No
+
+Yes
+
+Yes
+
+Rich text email body editor
+
+Yes
+
+Yes
+
+Yes
+
+Per-form notification overrides
+
+Yes
+
+Yes
+
+Yes
+
+Integration: Klaviyo
+
+No
+
+No
+
+Yes
+
+Integration: Mailchimp
+
+No
+
+No
+
+Yes
+
+Integration: Google Sheets
+
+No
+
+No
+
+Yes
+
+Integration: Zapier / Make
+
+No
+
+No
+
+Yes
+
+Integration: Slack
+
+No
+
+No
+
+Yes
+
+Billing & Plan page
+
+Yes
+
+Yes
+
+Yes
+
+Invoice history
+
+No
+
+Yes
+
+Yes
+
+Annual billing option
+
+No
+
+Yes
+
+Yes
+
+reCAPTCHA v3 spam protection
+
+No
+
+No
+
+Yes
+
+IP block list
+
+Yes
+
+Yes
+
+Yes
+
+Remove "Powered by" branding
+
+No
+
+Yes
+
+Yes
+
+Submission retention settings
+
+Yes
+
+Yes
+
+Yes
+
+GDPR data export (all data ZIP)
+
+Yes
+
+Yes
+
+Yes
+
+Help centre + changelog
+
+Yes
+
+Yes
+
+Yes
+
+Contact support channel
+
+Help centre
+
+Email
+
+Priority chat
+
+Masked IP in submission detail
+
+Last octet hidden
+
+Last octet hidden
+
+Full IP shown
+
+
+
+
+
+14.  Inline Upsell Moments
+
+Every gated feature in the Admin shows an in-context upsell rather than a dead end. Design principle: the upsell must appear inside the feature's own space, never redirect away from the current task.
+
+
+
+Trigger / Location
+
+Upsell Message & Action
+
+Submissions table — export row limit hit
+
+"You've reached the 100-row export limit. Upgrade to Starter for up to 1,000 rows, or Growth for 10,000." Button: Upgrade.
+
+Notification page — auto-responder section (Free)
+
+Grey card: "Customer auto-responders are available on Starter and Growth. Automatically send a confirmation email to everyone who fills out your form." Button: Upgrade to Starter.
+
+Integrations page (Free or Starter)
+
+Overlay card on each locked integration: "[Integration] is available on the Growth plan. Connect your submissions to your marketing stack automatically." Button: Upgrade to Growth.
+
+Forms table — at plan limit (Free: 2, Starter: 10)
+
+Row at the bottom of the table: "You've used X of X forms on the [PLAN] plan. Upgrade to [next plan] to create more." Button: Upgrade.
+
+Settings — Remove branding toggle (Free)
+
+Toggle is visible but disabled. Tooltip on hover: "Remove branding on Starter and Growth plans." Clicking the disabled toggle opens a small popover with upgrade CTA.
+
+Submission detail — IP address (Free/Starter)
+
+IP field shows "192.168.1.***" with a tooltip: "Full IP addresses are available on the Growth plan for compliance and spam management."
+
+File uploads (Free)
+
+If a File Upload field is added in the Theme Editor, the submission detail shows a "File uploads require Starter+" notice instead of the file link.
+
+
+
+
+
+15.  Gaps & Recommended Additions Not in Original Spec
+
+Items not explicitly specified in the Master Architecture v2 but required for a complete, professional embedded Shopify app:
+
+
+
+15.1  Activity / Audit Log
+
+A log of significant admin events visible in the Dashboard or Settings: "Form [name] archived by store owner · 2 hours ago", "Plan upgraded to Starter · yesterday", "Integration [Klaviyo] connected · 3 days ago." Essential for shops with multiple staff members.
+
+
+
+15.2  Email Deliverability Status
+
+A status widget in the Notifications page showing whether the last 5 alert emails were delivered, bounced, or failed (pulled from email provider webhook). "Last email sent: 2 hours ago · Delivered." Catches misconfigured email addresses before the merchant notices.
+
+
+
+15.3  Submission Spam Rate Card
+
+A small card on the Dashboard showing: "Spam blocked this month: X." Reinforces the value of the app's spam protection and creates an upsell hook toward reCAPTCHA (Growth).
+
+
+
+15.4  Per-Form Submission Notification Frequency Control
+
+An option in the Form Detail > Notification Settings to set the merchant alert to: "Every submission" / "Daily digest" / "Weekly digest." High-volume forms can flood a merchant's inbox — a digest option prevents unsubscribes from their own notification emails.
+
+
+
+15.5  Staff Accounts / Role Separation
+
+On Shopify, each staff member has their own Admin login. The app should respect Shopify's staff permissions: if a staff member doesn't have billing permissions, the Billing page should show "Contact your store owner to manage the plan" instead of the upgrade flow.
+
+
+
+15.6  Dark Mode
+
+Shopify Admin supports dark mode. Polaris handles this automatically for native components, but any custom SVG illustrations, chart colours, and custom banners should have explicit dark-mode variants so the app doesn't look broken in dark theme.
+
+
+
+15.7  Mobile Responsiveness
+
+Shopify Admin is used on mobile. The Dashboard overview cards should stack 2x2 then 1x4 on small screens. The submissions table should collapse to a card list view on mobile. The Billing plan cards should stack vertically.
+
+
+
+
+
+Custom Form Builder — Admin Dashboard PRD  ·  v1.0  ·  Confidential
+

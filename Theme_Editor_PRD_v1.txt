@@ -1,0 +1,2086 @@
+
+
+PRODUCT REQUIREMENTS DOCUMENT
+
+Theme Editor Experience
+
+Custom Form Builder — Shopify App
+
+Version 1.0  ·  Block Schema, Sidebar Settings, Field Types, Styling, Templates & Interactions
+
+
+
+
+
+1.  Purpose & Scope
+
+This PRD defines the complete Shopify Theme Editor experience for the Custom Form Builder app. The Theme Editor is the ONLY place where merchants create forms, add fields, configure field behaviour, and style the form. The Admin Dashboard (covered in a separate PRD) handles post-creation management: viewing submissions, billing, and notifications.
+
+
+
+What this PRD covers:
+
+The Form Block schema — how the block is registered and what Shopify natively renders in the sidebar
+
+Every sidebar setting exposed on the Form Block (root level)
+
+Every child Field Block type and each field's sidebar settings
+
+The design-mode overlay UI injected by the app's JS (template gallery, field picker, in-canvas controls)
+
+Styling settings at global (form) level and per-field override level (referencing the Design & Styling PRD for property details)
+
+The template system — browsing, applying, and managing templates
+
+Multi-step form configuration
+
+Conditional logic (Growth plan)
+
+How the Theme Editor experience connects back to the Admin Dashboard and App Backend
+
+Plan-gated feature locks inside the Theme Editor
+
+
+
+Out of scope: Form styling property detail (covered in Form Design & Styling PRD v1.0). Admin Dashboard pages (covered in Admin Dashboard PRD v1.0). Storefront runtime rendering and submission handling (covered in Backend Architecture doc).
+
+
+
+2.  Architecture Overview — How the App Lives in the Theme Editor
+
+The Custom Form Builder is a Shopify Theme App Extension. It ships two things into the merchant's theme:
+
+
+
+2.1  The Form Block (App Block)
+
+A single root App Block registered as blocks/custom-form-builder.liquid in the extension package. Merchants add this block once per form — to any section that supports app blocks (most built-in sections do, e.g. "Image with text", "Rich text", any custom section). Each instance of the block = one independent form.
+
+Block type identifier: custom-form-builder (referenced in schema as app blocks)
+
+Maximum 1 instance per section template (configurable in the extension schema to allow multiple)
+
+The block's Liquid renders only a lightweight container div with a data-fbw-form-id attribute; all real rendering is done by the Form Runtime JS, which hydrates the form from the block's settings JSON
+
+
+
+2.2  Nested Child Blocks (Field Blocks)
+
+Each field in the form is a separate child block nested inside the Form Block. Shopify natively supports nested blocks in theme extensions. The Form Block's schema defines a blocks array that whitelists only this app's own field block types — no other app's blocks can appear here, and the Form Block itself cannot nest another Form Block.
+
+Each field block type is a separate Liquid file: blocks/field-text.liquid, blocks/field-email.liquid, etc.
+
+Merchants add, remove, and reorder field blocks using Shopify's native "Add block" button and drag handles in the Theme Editor — no custom UI is required for this
+
+The ordering of child blocks in the Theme Editor is the rendering order of fields in the form
+
+
+
+2.3  Design-Mode Overlay (App-Injected JS)
+
+The Theme Editor loads the form's preview in an iframe. When Shopify signals design mode (window.Shopify.designMode === true), the app's JS activates an overlay layer on top of the live canvas. This overlay provides the enriched creation experience: the template gallery modal, the visual field picker, in-canvas drag handles, and contextual tooltips. This overlay is ONLY visible inside the Theme Editor — it is never shown to customers on the live storefront.
+
+
+
+
+
+3.  Form Block — Root Block Sidebar Settings
+
+When the merchant selects the Form Block (not a child field block) in the Theme Editor, the sidebar shows the following grouped settings. All settings are native Shopify settings_schema entries rendered by Shopify — no custom sidebar UI.
+
+
+
+3.1  Form Identity
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Form Name
+
+Internal name for this form instance. Shown in the Admin Dashboard Forms list, in the Submissions inbox, and in email notifications. Not shown to customers on the storefront.
+
+All plans
+
+Form ID (read-only)
+
+Auto-generated unique ID assigned on block creation. Used by the app backend to associate submissions. Not editable by the merchant.
+
+All plans
+
+Status Badge (display only)
+
+Shows the current form status: Active / Draft / Archived. Synced from the Admin Dashboard. Clicking it shows a tooltip explaining that status changes happen in the Admin Dashboard.
+
+All plans
+
+
+
+3.2  Form Behaviour
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Submit Button Label
+
+Text displayed on the submit button. Default: "Submit". Supports plain text only (no HTML).
+
+All plans
+
+Submit Action
+
+What happens after a successful submission. Options: Show Success Message (inline) / Redirect to URL / Show Thank You Page.
+
+All plans
+
+Redirect URL
+
+Shown only when Submit Action = "Redirect to URL". Must be a valid relative or absolute URL.
+
+All plans
+
+Success Message
+
+Shown only when Submit Action = "Show Success Message". Rich text input. Supports bold, italic, and inline links. Supports merge variable {{customer.name}}.
+
+All plans
+
+Reset Form After Submit
+
+Toggle. When ON, all field values are cleared after a successful submission so the form is blank again. Useful for kiosk or repeated-entry scenarios.
+
+All plans
+
+Hide Form After Submit
+
+Toggle. When ON, the entire form block is hidden after a successful submission and replaced by the success message only. When OFF, both form and success message are shown.
+
+All plans
+
+Loading State Text
+
+Text shown on the submit button while the submission is in-flight (POST in progress). Default: "Submitting..."
+
+All plans
+
+
+
+3.3  Multi-Step Configuration
+
+Plan gate: All plans. Multi-step grouping is controlled by inserting "Section Heading" field blocks which act as step dividers (see Section 4.13). The settings below control the step navigation UX.
+
+
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Enable Multi-Step Mode
+
+Toggle. When ON, Section Heading blocks become step dividers. When OFF, Section Headings render as plain section titles within a single page.
+
+All plans
+
+Show Progress Bar
+
+Toggle. Displays a progress bar above the form indicating current step / total steps.
+
+All plans
+
+Progress Bar Style
+
+Visual style of the progress bar: Linear filled bar / Step dots / Step numbers / None.
+
+All plans
+
+Show Step Labels
+
+Toggle. When ON, each Section Heading's title becomes a label on the progress bar or step indicator.
+
+All plans
+
+Next Button Label
+
+Label for the "Next" button between steps. Default: "Next".
+
+All plans
+
+Back Button Label
+
+Label for the "Back" button between steps. Default: "Back".
+
+All plans
+
+Validate Before Advancing
+
+Toggle. When ON, required fields in the current step must be valid before the merchant can advance. When OFF, steps can be navigated freely (validation runs on final submit only).
+
+All plans
+
+Step Transition Animation
+
+How one step transitions to the next: Slide left-right / Fade / None.
+
+All plans
+
+
+
+3.4  Spam Protection (Form-Level)
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Honeypot Field
+
+Always enabled. A hidden field (display:none) named with a common bot-targeted name. Real users never see it; bots fill it in. Submissions with this field populated are silently rejected. Not configurable — always ON.
+
+All plans
+
+Enable reCAPTCHA v3
+
+Toggle. When ON, each submission carries an invisible reCAPTCHA v3 token, scored server-side. Low-score submissions are flagged as spam. Uses the API keys configured in App Settings.
+
+Growth
+
+Minimum reCAPTCHA Score
+
+Slider: 0.1 to 0.9. Submissions scoring below this threshold are marked spam. Default: 0.5. Higher = stricter.
+
+Growth
+
+
+
+3.5  Accessibility (Form-Level)
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Form Role Label (aria-label)
+
+Text used as the accessible name for the <form> element. Defaults to the Form Name. Important for screen readers when multiple forms are on the same page.
+
+All plans
+
+Announce Errors Live (aria-live)
+
+Toggle. When ON, a visually-hidden aria-live region announces validation errors to screen readers as they appear.
+
+All plans
+
+Error Summary at Top
+
+Toggle. On submit failure, a summary of all validation errors appears above the form, with anchor links to each invalid field. Standard pattern for WCAG 2.1 AA compliance.
+
+All plans
+
+Focus First Error on Submit
+
+Toggle. When ON, focus jumps to the first invalid field after a failed submit attempt.
+
+All plans
+
+
+
+
+
+4.  Field Block Types — Complete Reference
+
+Each field type is a separate child block. Merchants add them via Shopify's native "Add block" button (under the Form Block in the sidebar list) or via the app's visual in-canvas field picker. The following sections detail every block type, its sidebar settings, and its plan gate.
+
+
+
+Field blocks available in the Theme Editor "Add block" list (whitelisted by parent schema):
+
+
+
+Field Block Type
+
+Description
+
+Plan Gate
+
+Text Input
+
+Single-line text. Default for name, address, phone, etc.
+
+All plans
+
+Email Input
+
+Single-line email. Validates format client-side and server-side.
+
+All plans
+
+Long Text (Textarea)
+
+Multi-line text. Resizable. Character counter optional.
+
+All plans
+
+Dropdown (Select)
+
+Custom div-based select with full style control. Options list defined in sidebar.
+
+All plans
+
+Radio Group
+
+Multiple-choice single-select. Options list in sidebar.
+
+All plans
+
+Checkbox Group
+
+Multiple-choice multi-select. Options list in sidebar.
+
+All plans
+
+Date Picker
+
+Custom calendar date picker. Date range constraints configurable.
+
+All plans
+
+File Upload
+
+Drag-and-drop + click-to-browse. File type and size limits in sidebar.
+
+Starter+
+
+Consent / Legal
+
+Checkbox with inline linked legal text. Required toggle forces acceptance before submit.
+
+All plans
+
+Hidden Field
+
+Not shown to customer. Pre-fills a value (static text, UTM parameter, or JS expression) and submits it silently.
+
+All plans
+
+Section Heading
+
+Visual divider / label within the form. In multi-step mode, acts as a step boundary.
+
+All plans
+
+Rating / NPS
+
+Star, heart, or thumb rating widget. Score stored as numeric value.
+
+Growth
+
+Number Input
+
+Single-line numeric. Configurable min, max, step, and decimal places.
+
+All plans
+
+Phone Input
+
+Single-line tel input with optional country code selector.
+
+All plans
+
+URL Input
+
+Single-line URL. Validates format.
+
+All plans
+
+Time Picker
+
+Custom time selection. 12h or 24h format. Min/max time constraints.
+
+All plans
+
+Signature Field
+
+Canvas-based freehand signature capture. Stored as base64 PNG.
+
+Growth
+
+
+
+4.1  Text Input
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label
+
+Field label text. Shown above (or inline, per global label position setting). Required for accessibility.
+
+All plans
+
+Placeholder Text
+
+Hint text shown inside the field when empty. Rendered as a styled <span> (not native placeholder) for full animation control (see Design PRD).
+
+All plans
+
+Help Text
+
+Optional descriptive text shown below the field. Supports inline links.
+
+All plans
+
+Required
+
+Toggle. When ON, the field must not be empty before the form can be submitted. Adds aria-required="true".
+
+All plans
+
+Field Width
+
+Width of this field within the form grid. Overrides the global field width. Options: 100% / 75% / 66% / 50% / 33% / 25% / Auto.
+
+All plans
+
+Input Type (sub-type)
+
+HTML input type hint. Options: text / search / tel / url / password. Affects mobile keyboard and browser auto-fill.
+
+All plans
+
+Max Length
+
+Maximum number of characters allowed. Shows a character counter near the input when set.
+
+All plans
+
+Min Length
+
+Minimum number of characters required. Validation error shown if below this on submit.
+
+All plans
+
+Autocomplete
+
+HTML autocomplete attribute value for browser autofill. Dropdown: off / name / email / tel / address-line1 / address-line2 / postal-code / etc.
+
+All plans
+
+Custom Validation Pattern
+
+Optional RegExp pattern for custom validation (e.g. matching a specific format). Shown with a custom error message if pattern fails.
+
+All plans
+
+Custom Validation Error
+
+Error message shown when the Custom Validation Pattern fails. Default: "Please enter a valid value."
+
+All plans
+
+Field ID / Name
+
+Internal field name used as the form submission key and in notification templates ({{fields.field_name}}). Auto-generated from label; editable.
+
+All plans
+
+Customize Style for This Field
+
+Toggle. When ON, reveals the per-field style override panel (see Section 6).
+
+All plans
+
+
+
+4.2  Email Input
+
+Inherits all settings from Text Input (Section 4.1) with the following differences:
+
+Input Type is fixed to "email" — not changeable
+
+Max Length default is 254 (RFC 5321 maximum email length)
+
+Autocomplete defaults to "email"
+
+Additional setting: Use as Auto-Responder Email — Toggle. When ON, this field's value is used as the recipient address for the customer auto-responder email. Only one Email field per form can have this toggle enabled; enabling it on a second field disables it on the first. A lock icon in the sidebar signals active selection.
+
+
+
+4.3  Long Text (Textarea)
+
+Inherits all settings from Text Input. Additional settings:
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Rows (initial height)
+
+Number of visible text rows when the textarea first renders. Default: 4.
+
+All plans
+
+Min Height
+
+CSS min-height of the textarea. Overrides Rows if larger. px / rem.
+
+All plans
+
+Max Height
+
+CSS max-height before the textarea becomes scrollable. px / rem / none.
+
+All plans
+
+Resize Direction
+
+How the merchant can resize the field: None / Vertical only / Horizontal only / Both.
+
+All plans
+
+Character Counter
+
+Toggle. When ON, shows "X / Y characters" below the field where Y = Max Length.
+
+All plans
+
+Character Counter Position
+
+Shown when Character Counter is ON. Options: Below field (left) / Below field (right) / Inline inside field (bottom-right).
+
+All plans
+
+Auto-Grow
+
+Toggle. When ON, the textarea expands vertically as the user types (no fixed height, no scrollbar). Ignores Max Height when active.
+
+All plans
+
+
+
+4.4  Dropdown (Custom Select)
+
+Uses a fully custom div/span implementation for complete styling and animation control (not a native <select>). Settings:
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Placeholder, Help Text, Required, Field Width
+
+Same as Text Input.
+
+All plans
+
+Options List
+
+A repeatable block of Option entries. Each option has: Label (displayed text) and Value (submitted value — defaults to label if blank). Drag-to-reorder in the sidebar. "Add option" button appends a new entry.
+
+All plans
+
+Default Selected Option
+
+Dropdown: None (placeholder shown) / select one of the defined options to pre-select it.
+
+All plans
+
+Allow Search / Filterable
+
+Toggle. When ON, a search input appears inside the dropdown panel allowing the customer to filter options by typing.
+
+All plans
+
+Multi-Select Mode
+
+Toggle. When ON, customers can select multiple options. Selected options are shown as removable chips in the trigger box. Submitted as comma-separated values.
+
+All plans
+
+Max Selections
+
+Shown when Multi-Select Mode is ON. Number input: how many options can be selected simultaneously. 0 = unlimited.
+
+All plans
+
+Panel Open Direction
+
+Auto (detects viewport space) / Always down / Always up.
+
+All plans
+
+Customize Style for This Field
+
+See Section 6.
+
+All plans
+
+
+
+4.5  Radio Group
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Help Text, Required, Field Width
+
+Same as Text Input.
+
+All plans
+
+Options List
+
+Same repeatable option entries as Dropdown (Label + Value). Drag-to-reorder.
+
+All plans
+
+Layout Direction
+
+Row (horizontal) / Column (vertical). Overrides global Radio Group layout setting for this field only.
+
+All plans
+
+Default Selected Option
+
+None / select one option to pre-select.
+
+All plans
+
+Show Option Images
+
+Toggle. When ON, each option entry gains an Image upload control. The image appears beside the radio label (useful for size/colour selectors).
+
+All plans
+
+Image Size
+
+Shown when Show Option Images is ON. Size of the image thumbnail: Small (24px) / Medium (48px) / Large (64px) / Custom px.
+
+All plans
+
+Customize Style for This Field
+
+See Section 6.
+
+All plans
+
+
+
+4.6  Checkbox Group
+
+Inherits the same settings as Radio Group. Key differences:
+
+Multi-select by design — multiple options can be checked simultaneously
+
+Submitted value: comma-separated list of checked option values
+
+Additional setting: Min Selections — minimum number of checkboxes that must be checked before submit. Default: 0 (any number valid including none, unless Required toggle is ON which enforces at least 1)
+
+Additional setting: Max Selections — maximum number of checkboxes that can be checked simultaneously. 0 = unlimited
+
+
+
+4.7  Date Picker
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Placeholder, Help Text, Required, Field Width
+
+Same as Text Input.
+
+All plans
+
+Date Format (Display)
+
+How the selected date is shown in the input: DD/MM/YYYY / MM/DD/YYYY / YYYY-MM-DD / Long (e.g. "August 4, 2026").
+
+All plans
+
+Date Format (Submitted Value)
+
+Format of the date value stored in the submission. Always ISO 8601 (YYYY-MM-DD) by default; not currently configurable to preserve server-side consistency.
+
+All plans
+
+Min Date
+
+Earliest selectable date. Options: None / Today / Specific date (date picker) / Days from today (number input, can be negative for past dates).
+
+All plans
+
+Max Date
+
+Latest selectable date. Same options as Min Date.
+
+All plans
+
+Disable Specific Days of Week
+
+Multi-select checkboxes: Sunday / Monday / … / Saturday. Selected days are greyed out in the calendar and unselectable.
+
+All plans
+
+Disable Specific Dates
+
+A free-text list of ISO dates to disable (e.g. bank holidays). One date per line.
+
+All plans
+
+Allow Date Range
+
+Toggle. When ON, customer can select a start date and an end date. Submitted as two values: field_name_start and field_name_end.
+
+All plans
+
+Calendar First Day of Week
+
+Sunday / Monday. Default: inherited from shop's locale.
+
+All plans
+
+Show Today Button
+
+Toggle. Shows a "Today" shortcut button in the calendar panel.
+
+All plans
+
+Customize Style for This Field
+
+See Section 6.
+
+All plans
+
+
+
+4.8  File Upload
+
+Plan gate: Starter+ required to receive and store file submissions. On Free, the block is visible in the Theme Editor and on the storefront, but file upload fields show an "Upgrade required" message instead of the drop zone when the form is submitted.
+
+
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Help Text, Required, Field Width
+
+Same as Text Input.
+
+Starter+
+
+Accepted File Types
+
+Comma-separated MIME type list or file extension list. Examples: image/*, .pdf, .docx, video/mp4. Default: any file type.
+
+Starter+
+
+Max File Size
+
+Maximum size per file in MB. Starter: max 5MB. Growth: max 10MB. Shown to customer in the drop zone instructions.
+
+Starter+
+
+Max Files
+
+Maximum number of files per field per submission. Default: 1. Max: 10. When > 1, the drop zone shows "Upload up to X files."
+
+Starter+
+
+Drop Zone Instruction Text
+
+Custom instruction text shown inside the drop zone. Default: "Drag and drop files here, or click to browse."
+
+Starter+
+
+Browse Button Label
+
+Label on the browse button inside the drop zone. Default: "Browse files."
+
+Starter+
+
+Show File Preview
+
+Toggle. When ON, image files show a thumbnail preview after selection. Non-image files show a file icon + name.
+
+Starter+
+
+Customize Style for This Field
+
+See Section 6.
+
+Starter+
+
+
+
+4.9  Consent / Legal Checkbox
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label (Legal Text)
+
+The consent statement text. Supports inline links (for Privacy Policy, Terms of Service URLs). Rich text editor with link insertion.
+
+All plans
+
+Required
+
+Toggle. Default ON. When ON, the checkbox must be checked for submission to proceed.
+
+All plans
+
+Link Text / URL (1)
+
+First link in the legal text. Label and URL inputs. Inserted into the Label rich text automatically.
+
+All plans
+
+Link Text / URL (2)
+
+Second link. Repeatable up to 3 links.
+
+All plans
+
+Link Opens in New Tab
+
+Toggle per link. Default ON (standard for legal links).
+
+All plans
+
+Field Width
+
+Default: 100%. Not usually overridden for consent fields.
+
+All plans
+
+Help Text
+
+Optional clarifying text below the checkbox (rarely used for consent fields).
+
+All plans
+
+Customize Style for This Field
+
+See Section 6.
+
+All plans
+
+
+
+4.10  Hidden Field
+
+Not shown to customers. Submits a pre-determined value silently with the form. Used for tracking, source attribution, and internal tagging.
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Field Name / ID
+
+The key used in submissions (e.g. "source", "campaign"). Required. Auto-prefilled if a Value Source is selected.
+
+All plans
+
+Value Source
+
+How the hidden value is populated: Static Text (a fixed string typed below) / URL Parameter (reads a named query string from the page URL) / JavaScript Expression (evaluated once on form init) / Shopify Liquid Tag (rendered server-side — only works for Liquid-rendered pages, not headless).
+
+All plans
+
+Static Value
+
+Shown when Value Source = Static Text. The exact string submitted.
+
+All plans
+
+URL Parameter Name
+
+Shown when Value Source = URL Parameter. The query string key to read (e.g. "utm_source" reads ?utm_source=google).
+
+All plans
+
+JavaScript Expression
+
+Shown when Value Source = JavaScript Expression. A JS expression evaluated in the browser (e.g. document.referrer or new Date().toISOString()).
+
+All plans
+
+Liquid Tag
+
+Shown when Value Source = Shopify Liquid Tag. A Liquid expression (e.g. {{ customer.email }} or {{ page.handle }}).
+
+All plans
+
+Include in Email Notifications
+
+Toggle. When ON, the hidden field's value is included in the merchant alert email. Default ON (useful for tracking).
+
+All plans
+
+
+
+4.11  Number Input
+
+Inherits all settings from Text Input. Additional settings:
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Minimum Value
+
+Lowest acceptable number. Validation error if below this on submit.
+
+All plans
+
+Maximum Value
+
+Highest acceptable number.
+
+All plans
+
+Step
+
+Increment for spinner arrows. Default: 1. Set to 0.01 for currency/decimal.
+
+All plans
+
+Decimal Places
+
+Number of decimal places shown and stored. Default: 0 (integer).
+
+All plans
+
+Show Spinner Arrows
+
+Toggle. Show/hide the native increment/decrement arrows.
+
+All plans
+
+Prefix / Suffix
+
+Optional display text before or after the input (e.g. "$" prefix, "kg" suffix). Visual only, not included in the submitted value.
+
+All plans
+
+
+
+4.12  Phone Input
+
+Inherits all settings from Text Input. Additional settings:
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Show Country Code Selector
+
+Toggle. When ON, a flag + dial-code dropdown appears before the number input. Default: OFF.
+
+All plans
+
+Default Country
+
+Pre-selected country in the dial-code dropdown. Default: inherited from shop's country.
+
+All plans
+
+Restrict to Countries
+
+Multi-select list. If set, only listed countries appear in the dial-code dropdown. Leave empty for all countries.
+
+All plans
+
+Phone Format Validation
+
+Toggle. When ON, validates the phone number format against the selected country's format (using libphonenumber-js). When OFF, accepts any non-empty string.
+
+All plans
+
+Autocomplete
+
+Defaults to "tel".
+
+All plans
+
+
+
+4.13  Section Heading (Divider)
+
+A non-input field block used to visually separate groups of fields. In multi-step mode, also acts as a step boundary.
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Heading Text
+
+The heading label. Rendered as an <h3> or <h4> depending on the form's heading hierarchy setting.
+
+All plans
+
+Subtitle Text
+
+Optional sub-heading below the main heading. Rendered as a <p>.
+
+All plans
+
+Show Divider Line
+
+Toggle. Renders a horizontal rule below the heading text.
+
+All plans
+
+Acts as Step Boundary
+
+Read-only display toggle — shows ON when Multi-Step Mode is enabled at the form level. In multi-step mode, each Section Heading marks the start of a new step; fields between two headings belong to the step started by the first heading.
+
+All plans
+
+Step Label (in multi-step)
+
+Shown only when Multi-Step Mode is ON. The label displayed on the progress bar for this step. Defaults to the Heading Text.
+
+All plans
+
+Customize Style for This Field
+
+See Section 6. Covers font size, weight, color, text transform, margin top/bottom, divider line style/color/thickness.
+
+All plans
+
+
+
+4.14  Rating / NPS Widget
+
+Plan gate: Growth only. On Free and Starter, the block appears in the "Add block" list with a lock icon. Clicking it shows an upgrade prompt.
+
+
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Help Text, Required, Field Width
+
+Same as Text Input.
+
+Growth
+
+Rating Style
+
+The type of widget: Star rating (1-5 or 1-10) / Heart rating / Thumbs up/down / NPS slider (0-10 numeric scale with labels).
+
+Growth
+
+Max Rating Value
+
+For Star/Heart: 5 or 10. For NPS: fixed at 10.
+
+Growth
+
+Min Rating Value
+
+For Star/Heart: 1. Not configurable for NPS (always 0).
+
+Growth
+
+Low Label (NPS only)
+
+Text label for the low end of the NPS scale (e.g. "Not at all likely").
+
+Growth
+
+High Label (NPS only)
+
+Text label for the high end of the NPS scale (e.g. "Extremely likely").
+
+Growth
+
+Allow Half Stars
+
+Toggle. Star rating only. When ON, customers can select 0.5 increments.
+
+Growth
+
+Default Value
+
+Pre-selected rating value. Default: none (empty).
+
+Growth
+
+Customize Style for This Field
+
+See Section 6. Covers icon type, size, gap, selected/unselected/hover colors, animation.
+
+Growth
+
+
+
+4.15  Time Picker
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Placeholder, Help Text, Required, Field Width
+
+Same as Text Input.
+
+All plans
+
+Time Format
+
+12-hour (AM/PM) / 24-hour.
+
+All plans
+
+Min Time
+
+Earliest selectable time. HH:MM format.
+
+All plans
+
+Max Time
+
+Latest selectable time. HH:MM format.
+
+All plans
+
+Minute Interval
+
+Step for minute selection: 1 / 5 / 10 / 15 / 30 / 60.
+
+All plans
+
+Submitted Format
+
+Format of stored value: HH:MM:SS / HH:MM / ISO 8601 datetime (combined with date field if linked).
+
+All plans
+
+Link to Date Field
+
+Dropdown: select a Date Picker field on this form to combine date + time into a single ISO datetime value.
+
+All plans
+
+Customize Style for This Field
+
+See Section 6.
+
+All plans
+
+
+
+4.16  Signature Field
+
+Plan gate: Growth only.
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Label, Help Text, Required, Field Width
+
+Same as Text Input.
+
+Growth
+
+Canvas Width
+
+Width of the signature drawing area. Default: 100% of field width.
+
+Growth
+
+Canvas Height
+
+Height of the drawing area. Default: 120px.
+
+Growth
+
+Pen Color
+
+Color of the signature stroke. Default: #000000 (black).
+
+Growth
+
+Pen Weight
+
+Stroke width. Options: Thin / Medium / Thick or exact px.
+
+Growth
+
+Background Color
+
+Canvas background. Default: white. Transparent is not recommended for export clarity.
+
+Growth
+
+Clear Button Label
+
+Label on the clear/reset button below the canvas. Default: "Clear."
+
+Growth
+
+Stored Format
+
+How the signature is stored: Base64 PNG data URL / URL of uploaded PNG (app uploads to storage and returns a URL).
+
+Growth
+
+Customize Style for This Field
+
+See Section 6.
+
+Growth
+
+
+
+
+
+5.  Design-Mode Overlay — App-Injected UI
+
+When the Theme Editor loads, the app's design-mode JS detects window.Shopify.designMode === true and activates the overlay layer on top of the live canvas. This is NOT a custom sidebar — it is injected into the canvas iframe. The overlay is always hidden on the live storefront.
+
+
+
+5.1  Empty-State Overlay (First Block Add)
+
+When a Form Block is added to a section for the first time (no child field blocks yet), the canvas shows the block's empty-state overlay instead of a form. This replaces what would otherwise be a blank white box.
+
+
+
+Element
+
+Details
+
+App logo + block name
+
+"Custom Form Builder" shown prominently inside the empty canvas area.
+
+Two primary action buttons
+
+"Browse Templates" (primary, filled) and "Start Blank" (secondary, outlined).
+
+Keyboard shortcut hint
+
+Small text: "Or use the sidebar to add individual fields."
+
+Animated dashed border
+
+The empty-state has an animated dashed border to signal it is interactive.
+
+Clicking "Browse Templates"
+
+Opens the Template Gallery Modal (Section 5.2).
+
+Clicking "Start Blank"
+
+Dismisses the overlay. Sidebar shows a focused tooltip pointing at the native "Add block" control with hint text: "Click Add block to add your first field."
+
+
+
+5.2  Template Gallery Modal
+
+A full-screen modal overlaid inside the canvas iframe. Fetched lazily (JS lazy-loads the modal HTML/CSS bundle on demand). Data loaded via signed App Proxy: GET /apps/formbuilder/templates.
+
+
+
+Element
+
+Details
+
+Header
+
+Modal title: "Choose a Template." Close button (X) top-right. A back arrow if inside a category drill-down.
+
+Search box
+
+Real-time filter on template name and tags. Debounced 300ms. Shows matching count.
+
+Category filter chips
+
+All / Contact / Feedback / Survey / Registration / Order / Application / Legal / Custom. Selecting a chip filters the grid.
+
+Template cards grid
+
+3-column grid on desktop, 1 on mobile. Each card: thumbnail screenshot, template name, field count badge, short description. Hover state reveals a "Preview" button.
+
+"Preview" button on hover
+
+Opens a full-size preview of the template rendered in an inner preview pane (same canvas, populated with placeholder data). Preview has a "Use this template" CTA and a back arrow.
+
+"Use this template" CTA
+
+Triggers: POST /apps/formbuilder/templates/:key/apply via App Proxy. Backend clones template fields into DB. Backend calls Shopify Admin GraphQL (themeFilesUpsert) to write the nested Field blocks. Theme Editor refreshes — merchant now sees real individual field blocks.
+
+Plan-gate overlay on templates
+
+Growth-only templates (e.g. multi-step with rating + signature) show a lock icon overlay on their card. Hovering shows "Requires Growth plan." Clicking opens the upgrade prompt (links to Admin Billing page).
+
+Empty search state
+
+"No templates match your search." + "Clear search" link.
+
+
+
+5.3  Visual Field Picker (In-Canvas)
+
+An alternative to the native "Add block" sidebar control. An in-canvas "+ Add Field" floating button appears at the bottom of the form in design mode. Clicking it opens the visual field picker panel.
+
+
+
+Element
+
+Details
+
+Trigger button
+
+A "+" button with label "Add Field" appears in-canvas below the last field block (or in the empty-state overlay). Shown only in design mode.
+
+Picker layout
+
+A slide-up panel showing field type cards in a 2-column grid. Each card has: icon, field type name, one-line description, and a real thumbnail preview of that field type.
+
+Plan-gated field types
+
+File Upload, Rating/NPS, Signature show a lock badge. Clicking them shows the upgrade prompt inline within the picker.
+
+Selection action
+
+Clicking a field type card: (1) calls App Backend via App Proxy to insert one field block of that type into the DB; (2) calls Shopify Admin GraphQL (themeFilesUpsert) to inject the child block into the Form Block's blocks array at the end; (3) Theme Editor refreshes; (4) sidebar auto-focuses the new field's settings.
+
+Insert position
+
+New field is appended at the end by default. Merchant can drag-reorder after insertion using native Theme Editor drag handles.
+
+Keyboard accessibility
+
+The picker panel is focusable via keyboard. Tab moves between field type cards; Enter/Space selects.
+
+
+
+5.4  In-Canvas Field Controls
+
+When hovering over individual field blocks in the canvas (design mode only), contextual controls appear:
+
+Blue outline border on the hovered field block — same as Shopify's native block hover indicator
+
+Drag handle (left edge) — native Shopify drag handle for reordering field blocks
+
+Duplicate button (toolbar on hover) — creates a copy of the field block immediately below, with all settings duplicated. Field Name/ID is auto-suffixed "_copy" to avoid duplicate keys.
+
+Delete button (toolbar on hover) — removes the field block. Confirmation tooltip: "Delete this field? This action cannot be undone."
+
+Quick-edit tooltip — a small floating tooltip showing the field's Label and Field Name/ID. Clicking the Label or Field Name text opens the sidebar directly at that field's settings.
+
+
+
+
+
+6.  Styling Settings — Theme Editor Sidebar
+
+All styling settings are surfaced as native Shopify Theme Editor sidebar controls (settings_schema). The full property catalogue is defined in the Form Design & Styling PRD v1.0. This section describes how those properties are ORGANIZED in the Theme Editor sidebar — the grouping, ordering, disclosure logic, and plan gates.
+
+
+
+6.1  Form Block Styling — Sidebar Group Order
+
+When the root Form Block is selected (not a child field), the sidebar is organized into the following expandable groups (Shopify renders these as collapsible "header" elements in the settings panel):
+
+
+
+Sidebar Group
+
+Contents
+
+Group 1: Form Identity
+
+Form Name, Form ID, Status Badge (see Section 3.1). Always at the top.
+
+Group 2: Form Behaviour
+
+Submit action, redirect URL, success message, reset/hide toggles (see Section 3.2).
+
+Group 3: Multi-Step
+
+Only shown when at least one Section Heading block is present. Multi-step mode toggle + step navigation settings (Section 3.3).
+
+Group 4: Container & Layout
+
+Section Wrapper settings, Inner Container card settings, Field Grid layout settings (Form Layout & Field Grid from Design PRD §4.1, §4.2, §4.4).
+
+Group 5: Typography
+
+Global font family, base font size, label styles, help text styles, error text styles (Design PRD §4.3, §4.5).
+
+Group 6: Input Fields
+
+Global input background, border, shadow, padding, height, focus/hover state defaults (Design PRD §4.6).
+
+Group 7: Interactive Elements
+
+Radio, Checkbox, Dropdown, Date Picker, File Upload, Rating global style defaults (Design PRD §4.8–§4.13).
+
+Group 8: Submit Button
+
+Full button style set (Design PRD §4.14).
+
+Group 9: Success Message
+
+Success block display type, colors, animation (Design PRD §4.15).
+
+Group 10: Progress Bar
+
+Multi-step progress bar style (Design PRD §4.16). Shown only when multi-step is enabled.
+
+Group 11: Accessibility
+
+aria-label, live region, error summary settings (Section 3.5).
+
+Group 12: Spam Protection
+
+reCAPTCHA settings (Section 3.4). reCAPTCHA controls locked on Free/Starter with upgrade CTA.
+
+Group 13: Advanced
+
+Responsive breakpoints toggle (Starter+), Dark mode color variants (Starter+), Form entrance animation (Starter+), Raw Custom CSS textarea (Growth), CSS Token reference panel (Growth).
+
+
+
+6.2  Field Block Styling — Sidebar Structure
+
+When a child Field Block is selected, the sidebar shows field-specific settings first (label, placeholder, help text, validation, etc. — as defined in Section 4 above), followed by a styling section:
+
+A horizontal divider and a "Field Style" heading separates behaviour settings from style settings
+
+"Customize style for this field" toggle — OFF by default. When OFF, shows a read-only summary: "This field inherits global form styles."
+
+When toggled ON: the field-level override panel expands below. Controls are organized identically to the Form Block's styling groups but only show properties relevant to that field type.
+
+State switcher (Default / Hover / Focus / Error / Disabled) appears as a segmented control at the top of the override panel. Switching states writes to state-specific CSS custom properties.
+
+Custom CSS Class input (always visible in field settings, all plans)
+
+Raw Custom CSS textarea (Growth only) — locked with upgrade CTA on Free/Starter
+
+
+
+
+
+7.  Conditional Logic (Growth Plan)
+
+Plan gate: Growth only. On Free and Starter, the Conditional Logic section is visible in the sidebar but all controls are locked. An inline upsell card reads: "Conditional logic is available on the Growth plan. Show or hide fields based on what your customers select." with a link to the Billing page.
+
+
+
+7.1  What Conditional Logic Does
+
+Conditional logic (also called "show/hide rules" or "branching logic") allows specific fields to be shown or hidden based on the values a customer has entered in earlier fields. This enables dynamic forms that adapt to the customer without requiring multiple separate forms.
+
+Example: Show a "File Upload" field ONLY if the customer selects "Yes" in a Radio Group asking "Do you have supporting documents?"
+
+Example: Show a "Company Name" text field ONLY if the customer's "Account Type" dropdown is set to "Business"
+
+Example: Skip an entire step in a multi-step form if the customer selects a specific value
+
+
+
+7.2  Conditional Logic Sidebar — Per Field
+
+Each field block has a "Conditional Logic" section at the bottom of its sidebar settings (below the styling section). It contains:
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Logic Mode toggle
+
+Enable / Disable conditional logic for this field. When disabled (default), the field always shows. When enabled, the rules below determine visibility.
+
+Growth
+
+Visibility default
+
+What this field does when no rules match or when a referenced field hasn't been filled yet: Show by default / Hide by default.
+
+Growth
+
+Rule set (AND/OR)
+
+A top-level operator: "Show this field when ALL of the following are true (AND)" or "Show this field when ANY of the following are true (OR)".
+
+Growth
+
+Individual rules
+
+Each rule is a row: [Field selector dropdown] [Condition dropdown] [Value input]. Up to 10 rules per field.
+
+Growth
+
+Field selector
+
+A dropdown listing all other fields on the same form (by their Label). Fields listed before the current field in form order are available as source fields.
+
+Growth
+
+Condition options
+
+Depends on the source field type. Text fields: is / is not / contains / does not contain / is empty / is not empty. Dropdown/Radio: is / is not (option value selector). Checkbox: contains / does not contain (option value). Number: = / != / > / < / >= / <=. Rating: = / != / > / <.
+
+Growth
+
+Value input
+
+The comparison value. For Dropdown/Radio source fields, this is a dropdown of the source field's defined options. For text, it is a free text input.
+
+Growth
+
+"Add Rule" button
+
+Appends a new blank rule row.
+
+Growth
+
+"Remove" per rule
+
+An X button removes that rule row.
+
+Growth
+
+Live preview in canvas
+
+As the merchant configures rules, the canvas preview updates to reflect the visibility state if a demo value is provided. A "Test with value" input beside the field selector lets merchants enter a test value to preview the logic effect live.
+
+Growth
+
+
+
+7.3  Conditional Logic — Multi-Step Interaction
+
+When multi-step mode is enabled alongside conditional logic:
+
+A hidden field does not count toward step validation — if a hidden required field exists in the current step, it does not block the "Next" button
+
+If ALL fields in a step are hidden by conditional logic, that step is automatically skipped in the navigation sequence (the progress bar jumps to the next step with visible fields)
+
+Step-skipping is re-evaluated on every value change, in real-time
+
+
+
+
+
+8.  Template System — Full Specification
+
+
+
+8.1  Template Catalogue
+
+Templates are curated by the app team and served from the App Backend. Merchants cannot create custom templates in v1.0 (roadmap for v2). The template catalogue is divided by plan:
+
+
+
+Template Tier
+
+Details
+
+Starter templates (Free plan)
+
+5 basic templates: Simple Contact Form, Newsletter Signup, Event Registration, Basic Feedback, Product Inquiry.
+
+Full library (Starter+)
+
+30+ templates across all categories. Categories: Contact / Feedback & Survey / Event & Registration / Application / Order & Booking / Legal & Consent / E-Commerce / Support & Help Desk.
+
+Growth-only templates
+
+Templates that use Rating, Signature, or Conditional Logic fields. These are tagged "Growth" in the gallery and locked on Free/Starter.
+
+
+
+8.2  Template Data Structure
+
+Each template stored on the App Backend contains:
+
+Template key (URL-safe slug, e.g. "simple-contact-form")
+
+Display name, description, category tags, field count, thumbnail URL
+
+Minimum plan required (free / starter / growth)
+
+An ordered array of field definitions — each field has: type, label, placeholder, help text, required flag, default options list (for dropdowns/radios/checkboxes), and all other field-specific settings
+
+Form-level defaults — submit label, success message, multi-step mode flag
+
+Style snapshot (optional) — if the template includes a styled design, the global form CSS custom property overrides are included
+
+
+
+8.3  Template Application Flow
+
+When a merchant selects "Use this template":
+
+Step 1 — App Backend receives POST /apps/formbuilder/templates/:key/apply with the shop's access token (signed via App Proxy)
+
+Step 2 — Backend looks up the template definition, creates a new Form DB record and one FormField DB record per template field
+
+Step 3 — Backend builds the Shopify block schema JSON representing the Form Block with all child Field blocks embedded as nested blocks with their settings populated from the template field definitions
+
+Step 4 — Backend calls Shopify Admin GraphQL themeFilesUpsert to write this block JSON into the current published theme's JSON template file
+
+Step 5 — Theme Editor auto-refreshes the canvas (Shopify fires a postMessage to the iframe on theme file change)
+
+Step 6 — Merchant sees their form populated with all template fields, individually editable as native child blocks
+
+Step 7 — A success banner appears in the canvas overlay: "Template applied! Customize your fields in the sidebar."
+
+
+
+
+
+9.  Plan-Gate UX Inside the Theme Editor
+
+Locked features in the Theme Editor must not be invisible dead ends — they must be discoverable, clearly explained, and provide a direct path to upgrade. The following patterns are used:
+
+
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Locked field block type (in "Add block" list)
+
+The field type appears in the native list with a lock padlock icon badge. Selecting it does NOT add the block — instead, a system toast or inline Shopify notification appears: "[Field Type] is available on the [Plan] plan." with a "Upgrade" link that opens the Admin Dashboard Billing page (in a new browser tab, since the Theme Editor is an embedded frame).
+
+Growth
+
+Locked field block type (in visual field picker)
+
+Same lock badge on the card thumbnail. Clicking the card shows an inline popover within the picker: feature description + "Upgrade to Growth" button.
+
+Growth
+
+Locked template in gallery
+
+Lock overlay on card. Hovering shows plan badge. Clicking shows inline popover.
+
+Growth
+
+Locked sidebar setting (e.g. reCAPTCHA)
+
+The toggle or control is visible but greyed out (CSS opacity). A lock icon is placed beside the setting label. Clicking or hovering shows a tooltip: "Available on [Plan]. Upgrade in the Admin Dashboard." The tooltip includes a direct link.
+
+Growth
+
+Locked styling group (e.g. responsive breakpoints)
+
+The group header shows a lock icon. The group is collapsed and cannot be expanded. Clicking the header shows a tooltip with the plan requirement.
+
+Starter+
+
+Locked raw CSS textarea (Growth)
+
+The textarea is visible but disabled. An overlay card inside the textarea reads: "Custom CSS is available on the Growth plan." with an upgrade button.
+
+Growth
+
+Form limit reached (Free: 2 forms, Starter: 10 forms)
+
+Adding a new Form Block to the theme when the plan limit is reached: the block is added normally BUT the canvas shows a warning overlay: "You have X active forms. You've reached the [Plan] limit. This form will remain in Draft status until you upgrade or archive another form." A direct link to the Billing page is shown.
+
+All plans
+
+
+
+
+
+10.  Form Publishing, Save & Sync
+
+
+
+10.1  How Saving Works
+
+The Theme Editor's native Save/Publish button is the ONLY save mechanism for form configuration. There is no separate save button in the sidebar or canvas overlay. The app does not intercept or duplicate Shopify's save flow.
+
+When the merchant clicks Shopify's Save button: Shopify writes the entire theme JSON (including all block settings) to the published theme
+
+The form's field configuration and visual settings are stored entirely inside the theme's JSON template file as part of the block schema — not in the app's database
+
+The app's database (Form and FormField records) is the source of truth for submission routing, notification rules, and integration configuration, NOT for visual settings
+
+On every Theme Editor load, the app's design-mode JS reads the current block settings from Shopify's block data object and syncs any changes back to the App Backend via a lightweight sync call — this keeps the DB in sync with the theme
+
+
+
+10.2  Draft vs. Active Status
+
+A form's status (Active / Draft / Archived) is managed in the Admin Dashboard and stored in the App Backend DB. The Theme Editor does not directly control this status — it is shown as a read-only badge in the Form Identity group (Section 3.1).
+
+A new form block added to the theme starts as "Draft" in the DB until the theme is saved (published)
+
+Once the theme is saved and the block is live, the form status transitions to "Active" automatically via a webhook (theme/publish webhook or a sync on next load)
+
+Archiving or deleting a form is done in the Admin Dashboard — it does NOT remove the block from the theme. The block remains in the theme but the storefront runtime JS detects the "Archived" status and renders nothing (or a configurable replacement message)
+
+
+
+10.3  Multiple Forms on the Same Page
+
+Multiple Form Blocks can be added to the same page template (each in a separate section, or within sections that support multiple app blocks). Each block instance is independent:
+
+Each has its own unique Form ID
+
+Each has its own submission routing, notification settings, and Admin Dashboard entry
+
+Styling is scoped per form block using the block's unique ID as a CSS scope
+
+Multiple form submissions on the same page do not interfere with each other's success messages
+
+
+
+
+
+11.  Client-Side Validation — Behaviour Specification
+
+All validation runs in the browser before the form is submitted to the backend. The backend also validates (never trust the client), but the client-side validation provides immediate feedback.
+
+
+
+11.1  Validation Trigger Modes
+
+Mode
+
+Behaviour
+
+On submit (default)
+
+All fields validate simultaneously when the customer clicks Submit. Error messages appear beside each invalid field. Focus jumps to the first error.
+
+On blur (optional)
+
+Each field validates individually when the customer moves focus away from it (onBlur event). Error message appears immediately. Enabled via the "Validate on blur" toggle in the Form Behaviour settings.
+
+Real-time (on input)
+
+Once a field has been touched and shown an error, validation re-runs on every keystroke so the error clears as soon as the input becomes valid. Always active — not configurable.
+
+
+
+11.2  Validation Rules by Field Type
+
+Setting / Element
+
+Description & Behaviour
+
+Plan Gate
+
+Text / Number / URL / Phone
+
+Required check, min/max length, custom RegExp pattern, min/max value (Number), URL format (URL), phone format (Phone).
+
+All plans
+
+Email
+
+Required check, RFC 5322 email format regex.
+
+All plans
+
+Dropdown / Radio
+
+Required check (at least one option selected).
+
+All plans
+
+Checkbox Group
+
+Required check (at least 1 checked), min/max selections.
+
+All plans
+
+Date Picker
+
+Required check, min date, max date, disabled days/dates.
+
+All plans
+
+File Upload
+
+Required check, file type whitelist, file size limit, max file count.
+
+Starter+
+
+Consent Checkbox
+
+Required check (must be checked).
+
+All plans
+
+Rating
+
+Required check (a rating must be selected).
+
+Growth
+
+Signature
+
+Required check (canvas must not be blank — minimum stroke length threshold).
+
+Growth
+
+Long Text
+
+Required check, min/max length, character counter (not a validation rule — display only).
+
+All plans
+
+
+
+11.3  Error Message Display
+
+Each field has an error message slot rendered below the input (or below the options for radio/checkbox)
+
+Error messages are visually hidden when there is no error (display:none or visibility:hidden — configurable via the state styling system)
+
+Error message text is: (a) the Custom Validation Error message if defined on the field, (b) a per-rule default message, or (c) a global fallback from the form's error message settings
+
+A "valid" success state (green border + checkmark) shows when a previously-errored field becomes valid — configurable as a toggle in Form Behaviour settings
+
+An Error Summary block appears above the form on submit failure when the "Error Summary at Top" accessibility toggle is ON (see Section 3.5)
+
+
+
+
+
+12.  Field Ordering, Duplication & Deletion
+
+
+
+12.1  Reordering Fields
+
+Field ordering is controlled entirely by Shopify's native Theme Editor drag-and-drop mechanism. The app does not implement a custom drag system.
+
+Each child block has a native drag handle in the sidebar block list and in the canvas
+
+The order of child blocks in the Shopify block JSON is the rendering order of fields in the storefront form
+
+The app's backend syncs field order from the block JSON on every save
+
+
+
+12.2  Duplicating Fields
+
+A "Duplicate" button appears in the in-canvas hover toolbar (Section 5.4) and in the sidebar's three-dot menu for each field block.
+
+Duplication creates a copy of the field block with all settings preserved
+
+The duplicated field's Label gets " (copy)" appended
+
+The duplicated field's Field Name/ID is suffixed with "_2" (or next available integer suffix) to avoid key collisions
+
+The duplicate is inserted immediately after the original in the block order
+
+If conditional logic rules reference the original field's ID, those rules are NOT copied to the duplicate — a warning toast notes: "Conditional logic rules referencing this field's ID were not duplicated. Update rules manually."
+
+
+
+12.3  Deleting Fields
+
+Fields are deleted using Shopify's native block delete button (the trash icon in the sidebar block list) or the in-canvas delete button (Section 5.4).
+
+Deleting a field block removes it from the Theme Editor block list and from the live preview immediately
+
+The field is permanently removed from the form on the next Theme Editor Save
+
+If other fields have conditional logic rules that reference the deleted field, those rules become invalid — a warning banner appears in the sidebar: "One or more conditional logic rules reference a deleted field. Review rules on affected fields." with a list of affected field names.
+
+Submissions already received that contained this field's data are not affected — the data is stored and remains visible in the Admin Dashboard Submissions inbox under the original field name
+
+
+
+
+
+13.  Relationship to Admin Dashboard
+
+The Theme Editor experience and the Admin Dashboard are complementary, not duplicative. The following table maps each concern to where it lives:
+
+
+
+Task / Concern
+
+Where It Lives
+
+Create a new form
+
+Theme Editor only — add a Form Block to any section
+
+Add, reorder, delete fields
+
+Theme Editor only — child block management
+
+Configure field labels, placeholders, validation
+
+Theme Editor sidebar only
+
+Style the form (colors, fonts, spacing, animations)
+
+Theme Editor sidebar only (Form Block and Field Block style settings)
+
+Apply a template
+
+Theme Editor only — via the template gallery modal
+
+Configure multi-step mode and step labels
+
+Theme Editor sidebar only
+
+Enable conditional logic (Growth)
+
+Theme Editor sidebar only (per-field conditional logic section)
+
+Configure spam protection (honeypot + reCAPTCHA)
+
+Theme Editor sidebar (per-form) + App Settings in Admin Dashboard (global keys)
+
+Set submit action / success message
+
+Theme Editor sidebar only
+
+View submissions received
+
+Admin Dashboard only (Submissions inbox)
+
+Configure merchant alert notification email
+
+Admin Dashboard only (Notifications page + per-form Form Detail > Notifications tab)
+
+Configure customer auto-responder email
+
+Admin Dashboard only (Notifications page + per-form Form Detail > Notifications tab)
+
+Set up integrations (Klaviyo, Sheets, Zapier)
+
+Admin Dashboard only (Integrations page)
+
+Archive or delete a form
+
+Admin Dashboard only (Forms table or Form Detail Danger Zone)
+
+View analytics (views, conversion rate)
+
+Admin Dashboard only (Dashboard overview + Form Detail Analytics tab)
+
+Manage billing and plan upgrade
+
+Admin Dashboard only (Billing & Plan page)
+
+Configure data retention, GDPR export
+
+Admin Dashboard only (Settings page)
+
+
+
+
+
+14.  Implementation Notes
+
+
+
+14.1  App Block Registration
+
+The Form Block is registered in extensions/custom-form-builder/blocks/form.liquid
+
+The block schema lists all root-level settings and a blocks array that whitelists the app's own field block types by their block type strings (e.g. "@app/field-text", "@app/field-email", etc.)
+
+The presets array registers a default preset so merchants see the block with a sensible default name in the "Add block" list
+
+The limit setting on the parent section controls how many Form Blocks can be added per page section; this is set by the theme, not the app
+
+
+
+14.2  Design-Mode JS Bundle
+
+The design-mode JS bundle is loaded via a <script> tag in the block's Liquid file, guarded by an if Shopify.designMode check
+
+The bundle is lazy-loaded — the main block JS (Form Runtime, ~12KB gzipped) loads on all pages; the design-mode overlay bundle (~40KB gzipped) loads only when designMode is true
+
+The overlay communicates with the App Backend via the signed App Proxy endpoint to avoid exposing the backend URL to the browser
+
+postMessage is used to communicate between the Theme Editor parent frame and the preview iframe when reflecting design-mode state changes
+
+
+
+14.3  CSS Architecture
+
+All theme block settings write to CSS custom properties (--fbw-*) on the block root element (#fbw-{blockId})
+
+The Form Runtime JS generates a <style> block scoped to the form block ID and injects it into the <head> on page load
+
+State-specific CSS (hover, focus, error) is written to pseudo-class and data-attribute selectors within the same scoped style block
+
+Responsive styles use @media (max-width: 768px) breakpoints injected in the same scoped style block
+
+Dark mode uses @media (prefers-color-scheme: dark) or a [data-color-scheme="dark"] data attribute on the block root, matching the theme's dark mode implementation
+
+
+
+14.4  App Proxy — Signed Requests
+
+All JS-initiated requests from the Theme Editor canvas iframe to the App Backend go through the Shopify App Proxy endpoint (/apps/formbuilder/...)
+
+Shopify signs these requests with an HMAC signature and passes the shop domain, so the backend can verify the request is legitimate and associate it with the correct shop
+
+The App Proxy allows CORS from the Theme Editor iframe without needing to open a custom CORS policy on the backend
+
+
+
+
+
+Custom Form Builder — Theme Editor Experience PRD  ·  v1.0  ·  Confidential
+
