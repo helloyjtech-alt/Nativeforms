@@ -1,0 +1,434 @@
+
+
+{% style %}
+  .shopify-app-block:has(> #nf-block-{{ block.id }}) {
+    width: 100%;
+    max-width: var(--nf-section-width, 100%);
+  }
+
+  #nf-block-{{ block.id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: var(--nf-align);
+    width: 100%; /* Base width */
+    max-width: var(--nf-section-width, 100%); /* Fallback to 100% if variable is empty */
+    min-width: 0;
+    margin: var(--nf-margin);
+    box-sizing: border-box;
+    font-family: var(--nf-font-body);
+    color: var(--nf-text);
+  }
+
+  #nf-block-{{ block.id }} * { box-sizing: border-box; }
+
+  #nf-block-{{ block.id }} .nativeforms-canvas-container {
+    width: 100%;
+    max-width: var(--nf-max-width);
+    min-height: 150px;
+    position: relative;
+  }
+
+  /* ----- Card / runtime form shell ----- */
+  #nf-block-{{ block.id }} .nf-form {
+    background: var(--nf-bg);
+    border: var(--nf-border-width) solid var(--nf-border);
+    border-radius: var(--nf-radius);
+    padding: var(--nf-padding);
+    box-shadow: var(--nf-shadow);
+    width: 100%;
+    box-sizing: border-box;
+    animation: nf-form-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes nf-form-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ----- Header ----- */
+  #nf-block-{{ block.id }} .nf-header {
+    text-align: var(--nf-title-align);
+    margin-bottom: 24px;
+  }
+  #nf-block-{{ block.id }} .nf-title {
+    font-family: var(--nf-font-heading);
+    font-size: var(--nf-title-size);
+    font-weight: var(--nf-title-weight);
+    color: var(--nf-title-color);
+    margin: 0 0 6px 0;
+    line-height: 1.25;
+  }
+  #nf-block-{{ block.id }} .nf-subtitle {
+    font-size: var(--nf-subtitle-size);
+    color: var(--nf-subtitle-color);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ----- Field grid ----- */
+  #nf-block-{{ block.id }} .nf-grid {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: var(--nf-row-gap);
+    column-gap: var(--nf-col-gap);
+    width: 100%;
+  }
+  #nf-block-{{ block.id }} .nf-field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100%;
+    max-width: 100%;
+    position: relative;
+  }
+  #nf-block-{{ block.id }} .nf-field[data-width="50"] { flex-basis: calc(50% - (var(--nf-col-gap) / 2)); }
+  #nf-block-{{ block.id }} .nf-field[data-width="33"] { flex-basis: calc(33.333% - (var(--nf-col-gap) * 2 / 3)); }
+  #nf-block-{{ block.id }} .nf-field[data-width="25"] { flex-basis: calc(25% - (var(--nf-col-gap) * 3 / 4)); }
+  @media (max-width: 640px) {
+    #nf-block-{{ block.id }} .nf-field[data-width] { flex-basis: 100%; }
+  }
+
+  /* ----- Label ----- */
+  #nf-block-{{ block.id }} .nf-label {
+    display: block;
+    font-size: var(--nf-label-size);
+    font-weight: var(--nf-label-weight);
+    color: var(--nf-label-color);
+    text-transform: var(--nf-label-transform);
+    margin-bottom: var(--nf-label-gap);
+    letter-spacing: 0.01em;
+  }
+  #nf-block-{{ block.id }} .nf-required {
+    color: var(--nf-required-color);
+    margin-left: 3px;
+  }
+  #nf-block-{{ block.id }} .nf-label.nf-sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; margin: -1px;
+  }
+
+  /* ----- Base control surface (text/email/number/textarea/select trigger) ----- */
+  #nf-block-{{ block.id }} .nf-control {
+    width: 100%;
+    display: block;
+    font-family: var(--nf-font-body);
+    font-size: var(--nf-input-font-size);
+    color: var(--nf-input-text);
+    background: var(--nf-input-bg);
+    border: 1.5px solid var(--nf-input-border);
+    border-radius: var(--nf-input-radius);
+    padding: var(--nf-input-padding);
+    transition: border-color var(--nf-transition-duration) ease,
+                box-shadow var(--nf-transition-duration) ease,
+                background-color var(--nf-transition-duration) ease;
+    outline: none;
+  }
+  #nf-block-{{ block.id }} .nf-control::placeholder { color: var(--nf-input-placeholder); }
+  #nf-block-{{ block.id }} .nf-control:hover:not(:disabled):not(:focus) { border-color: var(--nf-input-hover-border); }
+  #nf-block-{{ block.id }} .nf-control:focus,
+  #nf-block-{{ block.id }} .nf-select-trigger:focus {
+    border-color: var(--nf-input-focus-border);
+    box-shadow: 0 0 0 var(--nf-focus-ring-width) var(--nf-input-focus-ring);
+  }
+  #nf-block-{{ block.id }} .nf-control:disabled {
+    background: var(--nf-input-disabled-bg);
+    opacity: var(--nf-input-disabled-opacity);
+    cursor: not-allowed;
+  }
+  #nf-block-{{ block.id }} .nf-field[data-error="true"] .nf-control,
+  #nf-block-{{ block.id }} .nf-field[data-error="true"] .nf-select-trigger {
+    border-color: var(--nf-input-error-border);
+    background: var(--nf-input-error-bg);
+  }
+  #nf-block-{{ block.id }} textarea.nf-control { resize: vertical; min-height: 96px; line-height: 1.5; }
+
+  /* ----- Help / error text ----- */
+  #nf-block-{{ block.id }} .nf-help {
+    font-size: var(--nf-help-size);
+    color: var(--nf-help-color);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  #nf-block-{{ block.id }} .nf-error-msg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--nf-error-size);
+    font-weight: var(--nf-error-weight);
+    color: var(--nf-error-color);
+    margin-top: 6px;
+    animation: nf-shake-in 0.3s ease;
+  }
+  @keyframes nf-shake-in {
+    0% { opacity: 0; transform: translateY(-3px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ----- Custom Select ----- */
+  #nf-block-{{ block.id }} .nf-select {
+    position: relative;
+  }
+  #nf-block-{{ block.id }} .nf-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #nf-block-{{ block.id }} .nf-select-trigger:hover:not([aria-disabled="true"]) { border-color: var(--nf-input-hover-border); }
+  #nf-block-{{ block.id }} .nf-select-value { color: var(--nf-input-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #nf-block-{{ block.id }} .nf-select-value[data-placeholder="true"] { color: var(--nf-input-placeholder); }
+  #nf-block-{{ block.id }} .nf-select-arrow {
+    flex: none;
+    width: 10px; height: 10px;
+    border-right: 1.5px solid var(--nf-text-secondary);
+    border-bottom: 1.5px solid var(--nf-text-secondary);
+    transform: rotate(45deg);
+    transition: transform var(--nf-transition-duration) ease;
+    margin-top: -3px;
+  }
+  #nf-block-{{ block.id }} .nf-select[data-open="true"] .nf-select-arrow { transform: rotate(-135deg); margin-top: 3px; }
+  #nf-block-{{ block.id }} .nf-select-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: var(--nf-select-panel-bg);
+    border: 1px solid var(--nf-select-panel-border);
+    border-radius: var(--nf-select-panel-radius);
+    box-shadow: var(--nf-select-panel-shadow);
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 6px;
+    z-index: 40;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+    transition: opacity var(--nf-transition-duration) ease, transform var(--nf-transition-duration) ease;
+  }
+  #nf-block-{{ block.id }} .nf-select[data-open="true"] .nf-select-panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  #nf-block-{{ block.id }} .nf-option {
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-size: var(--nf-input-font-size);
+    color: var(--nf-input-text);
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+  }
+  #nf-block-{{ block.id }} .nf-option:hover,
+  #nf-block-{{ block.id }} .nf-option[data-active="true"] { background: var(--nf-select-option-hover-bg); }
+  #nf-block-{{ block.id }} .nf-option[data-selected="true"] {
+    background: var(--nf-select-option-selected-bg);
+    color: var(--nf-select-option-selected-text);
+    font-weight: 600;
+  }
+
+  /* ----- Radio / Checkbox groups ----- */
+  #nf-block-{{ block.id }} .nf-choice-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nf-choice-row-gap);
+  }
+  #nf-block-{{ block.id }} .nf-choice-group[data-direction="row"] { flex-direction: row; flex-wrap: wrap; column-gap: 20px; }
+  #nf-block-{{ block.id }} .nf-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nf-choice-gap);
+    cursor: pointer;
+    font-size: var(--nf-input-font-size);
+    color: var(--nf-text);
+  }
+  #nf-block-{{ block.id }} .nf-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  #nf-block-{{ block.id }} .nf-choice-box {
+    flex: none;
+    width: var(--nf-choice-size);
+    height: var(--nf-choice-size);
+    border: 1.5px solid var(--nf-choice-border);
+    background: var(--nf-choice-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--nf-transition-duration) ease;
+    margin-top: 1px;
+  }
+  #nf-block-{{ block.id }} .nf-choice-box.nf-radio-box { border-radius: 50%; }
+  #nf-block-{{ block.id }} .nf-choice-box.nf-check-box { border-radius: 5px; }
+  #nf-block-{{ block.id }} .nf-choice input:focus-visible ~ .nf-choice-box {
+    box-shadow: 0 0 0 var(--nf-focus-ring-width) var(--nf-input-focus-ring);
+  }
+  #nf-block-{{ block.id }} .nf-choice:hover .nf-choice-box { border-color: var(--nf-input-focus-border); }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-choice-box {
+    background: var(--nf-choice-checked-bg);
+    border-color: var(--nf-choice-checked-border);
+    transform: scale(1.04);
+  }
+  #nf-block-{{ block.id }} .nf-choice-box svg { width: 60%; height: 60%; opacity: 0; transform: scale(0.5); transition: all 0.15s ease; }
+  #nf-block-{{ block.id }} .nf-choice-box.nf-radio-box::after {
+    content: ''; width: 42%; height: 42%; border-radius: 50%; background: var(--nf-choice-checkmark);
+    opacity: 0; transform: scale(0.4); transition: all 0.15s ease;
+  }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-radio-box::after { opacity: 1; transform: scale(1); }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-check-box svg { opacity: 1; transform: scale(1); stroke: var(--nf-choice-checkmark); }
+  #nf-block-{{ block.id }} .nf-choice-label { line-height: var(--nf-choice-size); }
+
+  /* ----- Rating ----- */
+  #nf-block-{{ block.id }} .nf-rating { display: flex; gap: 6px; }
+  #nf-block-{{ block.id }} .nf-rating-star {
+    width: 26px; height: 26px; cursor: pointer;
+    fill: none; stroke: var(--nf-input-border); stroke-width: 1.5px;
+    transition: transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease;
+  }
+  #nf-block-{{ block.id }} .nf-rating-star:hover,
+  #nf-block-{{ block.id }} .nf-rating-star.nf-active {
+    fill: var(--nf-choice-checked-bg); stroke: var(--nf-choice-checked-bg); transform: scale(1.12);
+  }
+
+  /* ----- File upload ----- */
+  #nf-block-{{ block.id }} .nf-dropzone {
+    border: 1.5px dashed var(--nf-input-border);
+    border-radius: var(--nf-input-radius);
+    background: var(--nf-input-bg);
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--nf-transition-duration) ease;
+  }
+  #nf-block-{{ block.id }} .nf-dropzone:hover,
+  #nf-block-{{ block.id }} .nf-dropzone[data-dragover="true"] {
+    border-color: var(--nf-input-focus-border);
+    background: var(--nf-select-option-hover-bg);
+  }
+  #nf-block-{{ block.id }} .nf-dropzone svg { width: 28px; height: 28px; stroke: var(--nf-text-secondary); margin-bottom: 8px; }
+  #nf-block-{{ block.id }} .nf-dropzone-text { font-size: 13px; color: var(--nf-text-secondary); }
+  #nf-block-{{ block.id }} .nf-dropzone-text strong { color: var(--nf-input-focus-border); font-weight: 600; }
+  #nf-block-{{ block.id }} .nf-file-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--nf-select-option-hover-bg);
+    border-radius: 999px; padding: 6px 10px 6px 12px;
+    font-size: 13px; margin-top: 10px;
+  }
+  #nf-block-{{ block.id }} .nf-file-chip button {
+    background: none; border: none; cursor: pointer; color: var(--nf-text-secondary);
+    width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  #nf-block-{{ block.id }} .nf-file-chip button:hover { background: rgba(0,0,0,0.08); }
+
+  /* ----- Submit / navigation button ----- */
+  #nf-block-{{ block.id }} .nf-actions { display: flex; margin-top: 8px; }
+  #nf-block-{{ block.id }} .nf-actions[data-align="left"] { justify-content: flex-start; }
+  #nf-block-{{ block.id }} .nf-actions[data-align="center"] { justify-content: center; }
+  #nf-block-{{ block.id }} .nf-actions[data-align="right"] { justify-content: flex-end; }
+  #nf-block-{{ block.id }} .nf-actions[data-align="stretch"] { justify-content: stretch; }
+  #nf-block-{{ block.id }} .nf-submit {
+    width: var(--nf-btn-width);
+    font-family: var(--nf-font-body);
+    background: var(--nf-btn-bg);
+    color: var(--nf-btn-text);
+    border: none;
+    border-radius: var(--nf-btn-radius);
+    padding: var(--nf-btn-padding);
+    font-size: var(--nf-btn-font-size);
+    font-weight: var(--nf-btn-weight);
+    box-shadow: var(--nf-btn-shadow);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color var(--nf-transition-duration) ease,
+                color var(--nf-transition-duration) ease,
+                box-shadow var(--nf-transition-duration) ease,
+                transform var(--nf-transition-duration) ease;
+  }
+  #nf-block-{{ block.id }} .nf-submit:hover:not(:disabled) {
+    background: var(--nf-btn-hover-bg);
+    color: var(--nf-btn-hover-text);
+    box-shadow: var(--nf-btn-hover-shadow);
+    transform: translateY(var(--nf-btn-hover-lift));
+  }
+  #nf-block-{{ block.id }} .nf-submit:active:not(:disabled) { transform: scale(0.98); }
+  #nf-block-{{ block.id }} .nf-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+  #nf-block-{{ block.id }} .nf-spinner {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4); border-top-color: currentColor;
+    animation: nf-spin 0.7s linear infinite;
+  }
+  @keyframes nf-spin { to { transform: rotate(360deg); } }
+
+  /* ----- Success message ----- */
+  #nf-block-{{ block.id }} .nf-success {
+    background: var(--nf-success-bg);
+    border: 1px solid var(--nf-success-border);
+    color: var(--nf-success-text);
+    border-radius: var(--nf-success-radius);
+    padding: 18px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: nf-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #nf-block-{{ block.id }} .nf-success svg { width: 30px; height: 30px; }
+  @keyframes nf-scale-in {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── Multi-Step: progress ── */
+  #nf-block-{{ block.id }} .nf-progress { width: 100%; margin-bottom: 28px; }
+  #nf-block-{{ block.id }} .nf-step-title {
+    font-size: 22px; font-weight: 700; color: var(--nf-title-color);
+    margin: 0 0 6px 0; line-height: 1.3;
+  }
+  #nf-block-{{ block.id }} .nf-step-desc {
+    font-size: 14px; color: var(--nf-text-secondary); margin: 0 0 20px 0;
+  }
+  /* ── Multi-Step: nav buttons ── */
+  #nf-block-{{ block.id }} .nf-step-nav { display: flex; padding-top: 20px; margin-top: 24px; border-top: 1px solid var(--nf-border); }
+  #nf-block-{{ block.id }} .nf-back-btn:hover { background: var(--nf-input-bg) !important; }
+  #nf-block-{{ block.id }} .nf-continue-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  /* ── Slide transition helper ── */
+  #nf-block-{{ block.id }} .nativeforms-canvas-container { position: relative; }
+
+  /* Honeypot */
+  #nf-block-{{ block.id }} .nf-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #nf-block-{{ block.id }} * { animation: none !important; transition: none !important; }
+  }
+{% endstyle %}
+
+<div
+  id="nf-block-{{ block.id }}"
+  class="nativeforms-app-block"
+  data-form-id="{{ block.settings.form_id }}"
+  data-design-mode="{% if request.design_mode %}true{% else %}false{% endif %}"
+  data-shop="{{ shop.permanent_domain }}"
+  style="width: 100%; display: block; flex: 1 1 100%; max-width: 100%; box-sizing: border-box;"
+  {{ block.shopify_attributes }}
+>
+  <div class="nativeforms-canvas-container">
+    <!-- Runtime JS will inject the form here -->
+  </div>
+</div>
+<script src="{{ 'form-builder-runtime.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "NativeForms",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "form_id",
+      "label": "Form ID (Read-only)",
+      "info": "This ID links your Theme Editor block to the NativeForms backend. Do not change it manually unless directed."
+    },
+
+  ]
+}
+{% endschema %}

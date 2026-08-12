@@ -32,3 +32,111 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model Shop {
+  id              String   @id @default(cuid())
+  shop            String   @unique
+  plan            String   @default("FREE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  forms           Form[]
+  planUsage       PlanUsage?
+  integrations    Integration[]
+  notificationDefaults String?
+  appSettings     String?
+}
+
+model Form {
+  id              String   @id @default(cuid())
+  shop            String
+  shopRel         Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  title           String
+  status          String   @default("DRAFT") // ACTIVE, DRAFT, ARCHIVED
+  themeBlockId    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  fields          FormField[]
+  submissions     Submission[]
+  notification    NotificationSetting?
+  integrations    Integration[]
+  globalStyles    String? // JSON string containing global form styling configurations
+}
+
+model FormField {
+  id              String   @id @default(cuid())
+  formId          String
+  form            Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  type            String
+  label           String
+  settings        String // JSON string
+  styles          String? // JSON string containing { default: {}, hover: {}, etc. }
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  submissionValues SubmissionValue[]
+}
+
+model Submission {
+  id              String   @id @default(cuid())
+  formId          String
+  form            Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  status          String   @default("UNREAD") // UNREAD, READ, ARCHIVED, SPAM
+  isOverLimit     Boolean  @default(false)
+  submitterIp     String?
+  userAgent       String?
+  sourceUrl       String?
+  createdAt       DateTime @default(now())
+
+  values          SubmissionValue[]
+}
+
+model SubmissionValue {
+  id              String   @id @default(cuid())
+  submissionId    String
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  fieldId         String
+  field           FormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  value           String
+}
+
+model NotificationSetting {
+  id                   String   @id @default(cuid())
+  formId               String   @unique
+  form                 Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  
+  alertEmail           String?
+  replyTo              String?
+  alertSubject         String?
+  alertBody            String?
+  
+  autoResponderEnabled Boolean  @default(false)
+  autoResponderFrom    String?
+  autoResponderSubject String?
+  autoResponderBody    String?
+}
+
+model Integration {
+  id              String   @id @default(cuid())
+  shop            String
+  shopRel         Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  formId          String?
+  form            Form?    @relation(fields: [formId], references: [id], onDelete: SetNull)
+  type            String   // Klaviyo, GoogleSheets, Zapier, etc.
+  config          String   // JSON string of config
+  status          String   @default("CONNECTED") // CONNECTED, DISCONNECTED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PlanUsage {
+  id                 String   @id @default(cuid())
+  shop               String   @unique
+  shopRel            Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  submissionsCount   Int      @default(0)
+  billingPeriodStart DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+

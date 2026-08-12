@@ -16,7 +16,9 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+    "build:extension": "node build-extension.mjs",
+    "watch:extension": "node build-extension.mjs --watch"
   },
   "type": "module",
   "engines": {
@@ -37,6 +39,7 @@
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^3.10.1",
     "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
@@ -50,8 +53,10 @@
     "@types/node": "^22.2.0",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
+    "esbuild": "^0.28.1",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^10.0.1",
+    "preact": "^10.29.8",
     "prettier": "^3.2.4",
     "selfsigned": "^5.5.0",
     "typescript": "^5.2.2",

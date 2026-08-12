@@ -11,9 +11,15 @@ automatically_update_urls_on_dev = true
 [webhooks]
 api_version = "2026-10"
 
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_themes,write_themes,read_customers"
 
 [auth]
 redirect_urls = [ "https://localhost:3458/api/auth", "https://localhost:3458/api/auth/callback" ]
+
+[app_proxy]
+url = "https://localhost:3458/api/proxy"
+subpath = "forms"
+prefix = "apps"

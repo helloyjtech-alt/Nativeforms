@@ -1,334 +1,193 @@
-import { useEffect } from "react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
 import {
   Page,
   Layout,
-  Text,
   Card,
-  Button,
+  Text,
   BlockStack,
-  Box,
-  List,
-  Link,
   InlineStack,
+  Badge,
+  Grid,
+  Button,
+  Box,
+  Divider
 } from "@shopify/polaris";
-import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
+import { useLoaderData, useNavigate } from "@remix-run/react";
+import prisma from "../db.server";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
+} from "recharts";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
+  const shop = session.shop;
 
-  return null;
-};
+  const totalForms = await prisma.form.count({
+    where: { shop, status: { not: "ARCHIVED" } }
+  });
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
+  const totalSubmissions = await prisma.submission.count({
+    where: { form: { shop } }
+  });
+
+  const recentSubmissions = await prisma.submission.findMany({
+    where: { form: { shop } },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: { form: true, values: true }
+  });
+
+  // Mock chart data for now
+  const chartData = [
+    { name: 'Mon', submissions: 12 },
+    { name: 'Tue', submissions: 19 },
+    { name: 'Wed', submissions: 3 },
+    { name: 'Thu', submissions: 5 },
+    { name: 'Fri', submissions: 2 },
+    { name: 'Sat', submissions: 20 },
+    { name: 'Sun', submissions: 33 },
   ];
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($product: ProductCreateInput!) {
-        productCreate(product: $product) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        product: {
-          title: `${color} Snowboard`,
-        },
-      },
-    },
-  );
-  const responseJson = await response.json();
-
-  const product = responseJson.data!.productCreate!.product!;
-  const variantId = product.variants.edges[0]!.node!.id!;
-
-  const variantResponse = await admin.graphql(
-    `#graphql
-    mutation shopifyRemixTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
-        }
-      }
-    }`,
-    {
-      variables: {
-        productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
-      },
-    },
-  );
-
-  const variantResponseJson = await variantResponse.json();
 
   return {
-    product: responseJson!.data!.productCreate!.product,
-    variant:
-      variantResponseJson!.data!.productVariantsBulkUpdate!.productVariants,
+    totalForms,
+    totalSubmissions,
+    recentSubmissions,
+    chartData
   };
 };
 
-export default function Index() {
-  const fetcher = useFetcher<typeof action>();
-
-  const shopify = useAppBridge();
-  const isLoading =
-    ["loading", "submitting"].includes(fetcher.state) &&
-    fetcher.formMethod === "POST";
-  const productId = fetcher.data?.product?.id.replace(
-    "gid://shopify/Product/",
-    "",
-  );
-
-  useEffect(() => {
-    if (productId) {
-      shopify.toast.show("Product created");
-    }
-  }, [productId, shopify]);
-  const generateProduct = () => fetcher.submit({}, { method: "POST" });
+export default function Dashboard() {
+  const { totalForms, totalSubmissions, recentSubmissions, chartData } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
 
   return (
-    <Page>
-      <TitleBar title="Remix app template">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
-      </TitleBar>
-      <BlockStack gap="500">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <BlockStack gap="500">
+    <Page title="Dashboard Overview">
+      <Layout>
+        {/* Metric Cards Row */}
+        <Layout.Section>
+          <Grid>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <Card padding="400">
                 <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Congrats on creating a new Shopify app 🎉
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
-                    <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    interface examples like an{" "}
-                    <Link url="/app/additional" removeUnderline>
-                      additional page in the app nav
-                    </Link>
-                    , as well as an{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      Admin GraphQL
-                    </Link>{" "}
-                    mutation demo, to provide a starting point for app
-                    development.
-                  </Text>
+                  <Text as="p" variant="bodyMd" tone="subdued">Total Forms</Text>
+                  <Text as="h2" variant="headingLg">{totalForms}</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">Active & Draft</Text>
                 </BlockStack>
+              </Card>
+            </Grid.Cell>
+
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <Card padding="400">
                 <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    Get started with products
-                  </Text>
-                  <Text as="p" variant="bodyMd">
-                    Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      productCreate
-                    </Link>{" "}
-                    mutation in our API references.
-                  </Text>
+                  <Text as="p" variant="bodyMd" tone="subdued">Submissions</Text>
+                  <Text as="h2" variant="headingLg">{totalSubmissions}</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">All time</Text>
                 </BlockStack>
-                <InlineStack gap="300">
-                  <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product
-                  </Button>
-                  {fetcher.data?.product && (
-                    <Button
-                      url={`shopify:admin/products/${productId}`}
-                      target="_blank"
-                      variant="plain"
-                    >
-                      View product
-                    </Button>
-                  )}
+              </Card>
+            </Grid.Cell>
+
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <Card padding="400">
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodyMd" tone="subdued">Form Views</Text>
+                  <Text as="h2" variant="headingLg">0</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">Coming soon</Text>
+                </BlockStack>
+              </Card>
+            </Grid.Cell>
+
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <Card padding="400">
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodyMd" tone="subdued">Conversion Rate</Text>
+                  <Text as="h2" variant="headingLg">—</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">Coming soon</Text>
+                </BlockStack>
+              </Card>
+            </Grid.Cell>
+          </Grid>
+        </Layout.Section>
+
+        {/* Submissions Chart */}
+        <Layout.Section>
+          <Card padding="400">
+            <BlockStack gap="400">
+              <InlineStack align="space-between" blockAlign="center">
+                <Text as="h2" variant="headingMd">Submissions Activity</Text>
+                <InlineStack gap="200">
+                  <Button size="micro" pressed>7 Days</Button>
+                  <Button size="micro">30 Days</Button>
+                  <Button size="micro">90 Days</Button>
                 </InlineStack>
-                {fetcher.data?.product && (
-                  <>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productCreate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(fetcher.data.product, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productVariantsBulkUpdate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(fetcher.data.variant, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                  </>
-                )}
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <BlockStack gap="500">
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    App template specs
-                  </Text>
-                  <BlockStack gap="200">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Framework
-                      </Text>
-                      <Link
-                        url="https://remix.run"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Remix
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Database
-                      </Text>
-                      <Link
-                        url="https://www.prisma.io/"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Prisma
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Interface
-                      </Text>
-                      <span>
-                        <Link
-                          url="https://polaris.shopify.com"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          Polaris
-                        </Link>
-                        {", "}
-                        <Link
-                          url="https://shopify.dev/docs/apps/tools/app-bridge"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          App Bridge
-                        </Link>
-                      </span>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        API
-                      </Text>
-                      <Link
-                        url="https://shopify.dev/docs/api/admin-graphql"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphQL API
-                      </Link>
-                    </InlineStack>
-                  </BlockStack>
-                </BlockStack>
-              </Card>
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Next steps
-                  </Text>
-                  <List>
-                    <List.Item>
-                      Build an{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        {" "}
-                        example app
-                      </Link>{" "}
-                      to get started
-                    </List.Item>
-                    <List.Item>
-                      Explore Shopify’s API with{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphiQL
-                      </Link>
-                    </List.Item>
-                  </List>
-                </BlockStack>
-              </Card>
+              </InlineStack>
+              <Box minHeight="300px" paddingBlockStart="400">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E4E5E7" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6D7175', fontSize: 12}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#6D7175', fontSize: 12}} dx={-10} />
+                    <Tooltip 
+                      contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 2px 5px rgba(0,0,0,0.1)'}} 
+                    />
+                    <Line type="monotone" dataKey="submissions" stroke="#008060" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
             </BlockStack>
-          </Layout.Section>
-        </Layout>
-      </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        {/* Recent Submissions Feed */}
+        <Layout.Section>
+          <Card padding="400">
+            <BlockStack gap="400">
+              <InlineStack align="space-between" blockAlign="center">
+                <Text as="h2" variant="headingMd">Recent Submissions</Text>
+                <Button variant="plain" onClick={() => navigate('/app/submissions')}>View all</Button>
+              </InlineStack>
+              
+              {recentSubmissions.length === 0 ? (
+                <Box padding="400">
+                  <Text as="p" tone="subdued" alignment="center">No submissions yet.</Text>
+                </Box>
+              ) : (
+                <BlockStack gap="0">
+                  {recentSubmissions.map((sub: any, i: number) => {
+                    const firstTextVal = sub.values.find((v:any) => typeof v.value === 'string' && v.value.length > 0)?.value || "Anonymous";
+                    const isUnread = sub.status === "UNREAD";
+                    return (
+                      <Box key={sub.id} paddingBlockStart={i === 0 ? "0" : "300"} paddingBlockEnd="300">
+                        {i !== 0 && <Divider />}
+                        <Box paddingBlockStart={i !== 0 ? "300" : "0"}>
+                          <InlineStack align="space-between" blockAlign="center">
+                            <InlineStack gap="300" blockAlign="center">
+                              <Box style={{width: 8, height: 8, borderRadius: '50%', backgroundColor: isUnread ? '#008060' : '#E4E5E7'}} />
+                              <BlockStack gap="0">
+                                <Text as="span" variant="bodyMd" fontWeight="semibold">{firstTextVal}</Text>
+                                <Text as="span" variant="bodySm" tone="subdued">
+                                  {sub.form.title} • {new Date(sub.createdAt).toLocaleDateString()}
+                                </Text>
+                              </BlockStack>
+                            </InlineStack>
+                            <Button size="micro" variant="plain" onClick={() => navigate(`/app/submissions`)}>View</Button>
+                          </InlineStack>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </BlockStack>
+              )}
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+      </Layout>
     </Page>
   );
 }
