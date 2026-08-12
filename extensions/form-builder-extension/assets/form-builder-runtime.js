@@ -195,7 +195,7 @@
         inp.style.cssText = 'position:absolute;opacity:0;width:1px;height:1px;';
         inp.addEventListener('change', function () {
           if (isRadio) { group.querySelectorAll('.nf-btn-option').forEach(function (b) { css(b, { borderColor: btnBorder, background: btnBg, color: 'var(--nf-text)' }); }); }
-          if (inp.checked) css(btn, { borderColor: btnSelected, background: btnSelected, color: '#fff' });
+          if (inp.checked) css(btn, { borderColor: btnSelected, background: btnSelected, color: 'var(--nf-btn-segment-active-text, #fff)' });
           else css(btn, { borderColor: btnBorder, background: btnBg, color: 'var(--nf-text)' });
         });
         var lbl = el('span'); lbl.textContent = o.label;
@@ -224,7 +224,7 @@
         css(lbl, { fontSize: '12px', textAlign: 'center', padding: '6px', fontWeight: '500' });
         
         if (imgLabelPos === 'overlay') {
-           css(lbl, { position: 'absolute', bottom: '0', left: '0', right: '0', background: 'rgba(0,0,0,0.6)', color: '#fff' });
+           css(lbl, { position: 'absolute', bottom: '0', left: '0', right: '0', background: 'var(--nf-img-label-overlay, rgba(0,0,0,0.6))', color: 'var(--nf-img-label-color, #fff)' });
            imgWrap.appendChild(lbl);
         } else if (imgLabelPos === 'hidden') {
            css(lbl, { display: 'none' });
@@ -299,7 +299,7 @@
     var track = el('span');
     css(track, { position: 'relative', display: 'inline-flex', alignItems: 'center', width: '46px', height: '26px', borderRadius: '999px', background: 'var(--nf-input-border)', transition: 'background 0.22s', cursor: 'pointer', flexShrink: '0' });
     var thumb = el('span');
-    css(thumb, { position: 'absolute', left: '3px', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.25)', transition: 'transform 0.22s' });
+    css(thumb, { position: 'absolute', left: '3px', width: '20px', height: '20px', borderRadius: '50%', background: 'var(--nf-toggle-thumb, #fff)', boxShadow: '0 1px 4px rgba(0,0,0,0.25)', transition: 'transform 0.22s' });
     track.appendChild(thumb);
     var lblEl = el('span'); css(lblEl, { fontSize: 'var(--nf-input-font-size)', color: 'var(--nf-text)', fontWeight: '500' });
     lblEl.textContent = f.offLabel || 'Off';
@@ -445,7 +445,7 @@
   function renderSignature(f) {
     var wrap = el('div'); css(wrap, { display: 'flex', flexDirection: 'column', gap: '8px' });
     var canvas = el('canvas'); canvas.width = 600; canvas.height = 160;
-    css(canvas, { width: '100%', height: '160px', border: '1.5px solid var(--nf-input-border)', borderRadius: 'var(--nf-input-radius)', background: '#fff', cursor: 'crosshair', touchAction: 'none' });
+    css(canvas, { width: '100%', height: '160px', border: '1.5px solid var(--nf-input-border)', borderRadius: 'var(--nf-input-radius)', background: 'var(--nf-signature-bg, #fff)', cursor: 'crosshair', touchAction: 'none' });
     var hiddenInp = el('input', null, { type: 'hidden', name: f.id, id: 'nf-input-' + f.id });
     var ctx = canvas.getContext('2d');
     var drawing = false;
@@ -621,7 +621,7 @@
       css(circle, {
         width: '32px', height: '32px', borderRadius: '50%',
         background: (done || active) ? fillColor : trackColor,
-        color: (done || active) ? '#fff' : '#94a3b8',
+        color: (done || active) ? 'var(--nf-step-active-color, #fff)' : 'var(--nf-step-color, #94a3b8)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '13px', fontWeight: '700',
         border: active ? '3px solid ' + fillColor : 'none',
@@ -854,7 +854,7 @@
       if (stepIdx > 0) {
         var backBtn = el('button', 'nf-back-btn', { type: 'button' });
         backBtn.textContent = backLabel;
-        css(backBtn, { padding: '12px 24px', border: '1.5px solid ' + trackColor, background: '#fff', borderRadius: 'var(--nf-btn-radius)', cursor: 'pointer', fontWeight: '600', fontSize: 'var(--nf-btn-font-size)', color: 'var(--nf-text)', transition: 'all 0.15s' });
+        css(backBtn, { padding: '12px 24px', border: '1.5px solid ' + trackColor, background: 'var(--nf-step-back-bg, #fff)', borderRadius: 'var(--nf-btn-radius)', cursor: 'pointer', fontWeight: '600', fontSize: 'var(--nf-btn-font-size)', color: 'var(--nf-step-back-color, #334155)', transition: 'all 0.15s' });
         backBtn.addEventListener('click', function () {
           collectCurrentStep(stepEl);
           var prev = currentStep - 1;
@@ -868,7 +868,7 @@
       if (!isLastStep) {
         var nextBtn = el('button', 'nf-continue-btn', { type: 'button' });
         nextBtn.textContent = continueLabel;
-        css(nextBtn, { padding: '12px 32px', border: 'none', background: fillColor, color: '#fff', borderRadius: 'var(--nf-btn-radius)', cursor: 'pointer', fontWeight: '700', fontSize: 'var(--nf-btn-font-size)', boxShadow: '0 4px 14px ' + fillColor + '44', transition: 'all 0.15s' });
+        css(nextBtn, { padding: '12px 32px', border: 'none', background: fillColor, color: 'var(--nf-step-continue-color, #fff)', borderRadius: 'var(--nf-btn-radius)', cursor: 'pointer', fontWeight: '700', fontSize: 'var(--nf-btn-font-size)', boxShadow: '0 4px 14px ' + fillColor + '44', transition: 'all 0.15s' });
         nextBtn.addEventListener('click', function () {
           if (!validateStep(stepEl)) return; // per-step validation
           collectCurrentStep(stepEl);

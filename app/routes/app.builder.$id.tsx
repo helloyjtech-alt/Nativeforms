@@ -2669,7 +2669,29 @@ export default function FormBuilder() {
                         </Accordion>
                         
                         <Accordion title={`4. Form Layout (${styleState})`} defaultOpen={false}>
-                          <div style={{ marginBottom: '20px' }}><Select label="Layout mode" options={[{label:'1 Column (Full Width)',value:'1'},{label:'2 Columns (Half Width)',value:'2'}]} value={getGS('columns') || '1'} onChange={(v) => updateGlobalStyle('columns', v, styleState)} /></div>
+                          <div style={{ marginBottom: '20px' }}>
+                            <Select label="Layout mode" options={[
+                              {label:'1 Column (Full Width)',value:'1'},
+                              {label:'2 Columns (Half Width)',value:'2'},
+                              {label:'3 Columns',value:'3'},
+                              {label:'4 Columns',value:'4'},
+                              {label:'Custom Grid',value:'custom'}
+                            ]} value={getGS('columns') || '1'} onChange={(v) => updateGlobalStyle('columns', v, styleState)} />
+                          </div>
+                          {getGS('columns') === 'custom' && (
+                            <TextField label="Grid template columns" value={getGS('gridTemplate') || 'repeat(3, 1fr)'} onChange={(v) => updateGlobalStyle('gridTemplate', v, styleState)} autoComplete="off" />
+                          )}
+                          <div style={{ marginBottom: '20px' }}>
+                            <Select label="Default field width" options={[
+                              {label:'100%',value:'100%'},
+                              {label:'75%',value:'75%'},
+                              {label:'66%',value:'66%'},
+                              {label:'50%',value:'50%'},
+                              {label:'33%',value:'33%'},
+                              {label:'25%',value:'25%'},
+                              {label:'Auto',value:'auto'}
+                            ]} value={getGS('defaultFieldWidth') || '100%'} onChange={(v) => updateGlobalStyle('defaultFieldWidth', v, styleState)} />
+                          </div>
                           <SliderControl label="Column gap" value={getGS('gap') || '16px'} mobileValue={getGS('gap_mobile') || ''} onChange={(v:any) => updateGlobalStyle('gap', v, styleState)} onMobileChange={(v:any) => updateGlobalStyle('gap_mobile', v, styleState)} min={0} max={64} />
                           <SliderControl label="Row gap" value={getGS('rowGap') || '16px'} mobileValue={getGS('rowGap_mobile') || ''} onChange={(v:any) => updateGlobalStyle('rowGap', v, styleState)} onMobileChange={(v:any) => updateGlobalStyle('rowGap_mobile', v, styleState)} min={0} max={64} />
                           <div style={{ marginBottom: '20px' }}><Select label="Label position" options={[{label:'Top',value:'top'},{label:'Left',value:'left'},{label:'Right',value:'right'},{label:'Floating',value:'floating'}]} value={getGS('labelPosition') || 'top'} onChange={(v) => updateGlobalStyle('labelPosition', v, styleState)} /></div>
@@ -2679,6 +2701,13 @@ export default function FormBuilder() {
                         </Accordion>
                         
                         <Accordion title={`5. Global Typography (${styleState})`} defaultOpen={styleState === 'default'}>
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Base Font (Body)</div>
+                          <div style={{ marginBottom: '20px' }}><Select label="Base font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'},{label:'Outfit',value:'Outfit, sans-serif'}]} value={getGS('body_fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('body_fontFamily', v, styleState)} /></div>
+                          <SliderControl label="Base font size" value={getGS('body_fontSize') || '14px'} mobileValue={getGS('body_fontSize_mobile') || ''} onChange={(v:any) => updateGlobalStyle('body_fontSize', v, styleState)} onMobileChange={(v:any) => updateGlobalStyle('body_fontSize_mobile', v, styleState)} min={10} max={24} />
+                          <SliderControl label="Base line height" value={getGS('body_lineHeight') || '1.5'} mobileValue={getGS('body_lineHeight_mobile') || ''} onChange={(v:any) => updateGlobalStyle('body_lineHeight', v, styleState)} onMobileChange={(v:any) => updateGlobalStyle('body_lineHeight_mobile', v, styleState)} min={1} max={3} step={0.1} />
+                          <ColorControl label="Base text color" value={getGS('body_color') || '#202223'} darkValue={getGS('body_color_dark') || ''} onChange={(v:any) => updateGlobalStyle('body_color', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('body_color_dark', v, styleState)} />
+                          <ResponsiveTextField label="Base letter spacing" value={getGS('body_letterSpacing') || '0px'} mobileValue={getGS('body_letterSpacing_mobile') || ''} onChange={(v:any) => updateGlobalStyle('body_letterSpacing', v, styleState)} onMobileChange={(v:any) => updateGlobalStyle('body_letterSpacing_mobile', v, styleState)} />
+                          
                           <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
                           <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Labels</div>
                           <div style={{ marginBottom: '20px' }}><Select label="Label font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('label_fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('label_fontFamily', v, styleState)} /></div>
@@ -3162,6 +3191,9 @@ export default function FormBuilder() {
                                 {(selectedField.type === 'heading' || selectedField.type === 'paragraph') && (
                                   <Accordion title={`Typography (${styleState})`} defaultOpen={true}>
                                     <div style={{ marginBottom: '20px' }}><Select label="Text Alignment" options={[{label:'Left',value:'left'},{label:'Center',value:'center'},{label:'Right',value:'right'}]} value={getFS('textAlign') || 'left'} onChange={(v) => updateFS('textAlign', v)} /></div>
+                                    <ColorControl label="Text Color" value={getFS('color') || ''} onChange={(v:any) => updateFS('color', v)} />
+                                    <SliderControl label="Font Size" value={getFS('fontSize') || ''} onChange={(v:any) => updateFS('fontSize', v)} min={10} max={64} />
+                                    <div style={{ marginBottom: '20px' }}><Select label="Font Weight" options={[{label:'Inherit',value:''},{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'},{label:'Black',value:'900'}]} value={getFS('fontWeight') || ''} onChange={(v) => updateFS('fontWeight', v)} /></div>
                                     <FourWaySpacingControl label="Margin" value={getFS('margin') || '0px'} onChange={(v:any) => updateFS('margin', v)} />
                                   </Accordion>
                                 )}
@@ -3309,6 +3341,12 @@ export default function FormBuilder() {
                                 
                                 {selectedField.type === 'select' && (
                                   <Accordion title={`Dropdown Styling (${styleState})`} defaultOpen={true}>
+                                    <ColorControl label="Panel Background" value={getFS('panelBg') || ''} onChange={(v:any) => updateFS('panelBg', v)} />
+                                    <ResponsiveTextField label="Panel Border" value={getFS('panelBorder') || ''} onChange={(v:any) => updateFS('panelBorder', v)} />
+                                    <ColorControl label="Option Text Color" value={getFS('optionColor') || ''} onChange={(v:any) => updateFS('optionColor', v)} />
+                                    <ColorControl label="Option Hover Background" value={getFS('optionHoverBg') || ''} onChange={(v:any) => updateFS('optionHoverBg', v)} />
+                                    <ColorControl label="Option Selected Background" value={getFS('optionSelectedBg') || ''} onChange={(v:any) => updateFS('optionSelectedBg', v)} />
+                                    <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
                                     <div style={{ marginBottom: '16px' }}>
                                       <Select label="Dropdown Action" options={[{label: 'Click', value: 'click'}, {label: 'Hover', value: 'hover'}]} value={selectedField.dropdownAction || 'click'} onChange={(v) => updateSelectedField('dropdownAction', v)} />
                                     </div>
@@ -3318,6 +3356,16 @@ export default function FormBuilder() {
                                     <div style={{ marginBottom: '16px' }}>
                                       <Checkbox label="Rotate Icon 180° when open" checked={selectedField.iconRotate} onChange={(v) => updateSelectedField('iconRotate', v)} />
                                     </div>
+                                  </Accordion>
+                                )}
+                                
+                                {selectedField.type === 'multiselect' && (
+                                  <Accordion title={`Multi-Select Styling (${styleState})`} defaultOpen={true}>
+                                    <ColorControl label="Tag/Pill Background" value={getFS('tagBg') || ''} onChange={(v:any) => updateFS('tagBg', v)} />
+                                    <ColorControl label="Tag/Pill Text Color" value={getFS('tagColor') || ''} onChange={(v:any) => updateFS('tagColor', v)} />
+                                    <ColorControl label="Remove Icon Color" value={getFS('tagRemoveColor') || ''} onChange={(v:any) => updateFS('tagRemoveColor', v)} />
+                                    <SliderControl label="Tag Border Radius" value={getFS('tagRadius') || ''} onChange={(v:any) => updateFS('tagRadius', v)} min={0} max={20} />
+                                    <FourWaySpacingControl label="Tag Padding" value={getFS('tagPadding') || ''} onChange={(v:any) => updateFS('tagPadding', v)} />
                                   </Accordion>
                                 )}
                                 {['date', 'time', 'datetime'].includes(selectedField.type) && (
