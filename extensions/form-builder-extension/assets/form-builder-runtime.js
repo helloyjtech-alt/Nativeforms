@@ -64,8 +64,8 @@
     });
     if (!gs) return;
     Object.keys(gs).forEach(function (k) {
-      // Map step_* keys from DB to --nf-step-* variables
-      var cssKey = k.replace(/_/g, '-');
+      // Convert snake_case and camelCase to kebab-case for CSS vars
+      var cssKey = k.replace(/_/g, '-').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
       container.style.setProperty('--nf-' + cssKey, String(gs[k]));
     });
   }
@@ -346,23 +346,57 @@
     var wrap = el('div');
     var zone = el('div', 'nf-dropzone', { tabindex: '0' });
     zone.innerHTML = ICO.upload + '<div class="nf-dropzone-text"><strong>Click to upload</strong> or drag &amp; drop</div>';
-    var input = el('input', null, { type: 'file', id: 'nf-input-' + f.id, name: f.id, style: 'display:none' });
-    if (f.acceptedTypes) input.setAttribute('accept', f.acceptedTypes);
+    
+    var fileInput = el('input', null, { type: 'file', style: 'display:none' });
+    var hiddenInput = el('input', null, { type: 'hidden', name: f.id, id: 'nf-input-' + f.id });
+    
+    if (f.acceptedTypes) fileInput.setAttribute('accept', f.acceptedTypes);
+    
     var chips = el('div');
-    function showChip(file) {
-      chips.innerHTML = '';
-      var chip = el('span', 'nf-file-chip');
-      var name = el('span'); name.textContent = file.name;
-      var rm = el('button', null, { type: 'button' }); rm.innerHTML = ICO.close;
-      rm.addEventListener('click', function (e) { e.stopPropagation(); input.value = ''; chips.innerHTML = ''; });
-      chip.appendChild(name); chip.appendChild(rm); chips.appendChild(chip);
+    
+    function setFileUrl(url, nameStr) {
+       hiddenInput.value = url;
+       chips.innerHTML = '';
+       var chip = el('span', 'nf-file-chip');
+       var name = el('span'); name.textContent = nameStr;
+       var rm = el('button', null, { type: 'button' }); rm.innerHTML = ICO.close;
+       rm.addEventListener('click', function (e) { e.stopPropagation(); hiddenInput.value = ''; fileInput.value = ''; chips.innerHTML = ''; });
+       chip.appendChild(name); chip.appendChild(rm); chips.appendChild(chip);
     }
-    zone.addEventListener('click', function () { input.click(); });
-    input.addEventListener('change', function () { if (input.files && input.files[0]) showChip(input.files[0]); });
+    
+    function uploadFile(file) {
+       zone.setAttribute('data-uploading', 'true');
+       chips.innerHTML = '<div style="margin-top: 8px; font-size: 13px; color: var(--nf-text)">Uploading...</div>';
+       
+       var fd = new FormData();
+       fd.append('file', file);
+       
+       fetch('/apps/forms/upload', {
+         method: 'POST',
+         body: fd
+       })
+       .then(function(res) { return res.json(); })
+       .then(function(data) {
+         zone.removeAttribute('data-uploading');
+         if (data.success) {
+           setFileUrl(data.url, file.name);
+         } else {
+           chips.innerHTML = '<div style="margin-top: 8px; font-size: 13px; color: red;">' + (data.error || 'Upload failed') + '</div>';
+         }
+       })
+       .catch(function(err) {
+         zone.removeAttribute('data-uploading');
+         chips.innerHTML = '<div style="margin-top: 8px; font-size: 13px; color: red;">Upload failed.</div>';
+       });
+    }
+
+    zone.addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function () { if (fileInput.files && fileInput.files[0]) uploadFile(fileInput.files[0]); });
     ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.setAttribute('data-dragover', 'true'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.removeAttribute('data-dragover'); }); });
-    zone.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files[0]) { showChip(e.dataTransfer.files[0]); } });
-    wrap.appendChild(zone); wrap.appendChild(input); wrap.appendChild(chips);
+    zone.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files[0]) { uploadFile(e.dataTransfer.files[0]); } });
+    
+    wrap.appendChild(zone); wrap.appendChild(fileInput); wrap.appendChild(hiddenInput); wrap.appendChild(chips);
     return wrap;
   }
 
@@ -576,6 +610,42 @@
       });
     }
 
+    // Evaluate conditional logic rules
+    function evaluateLogic(stepEl, pageFields) {
+      collectCurrentStep(stepEl);
+      pageFields.forEach(function (f) {
+        if (!f.rules || !f.rules.length) return;
+        var fieldWrap = stepEl.querySelector('#nf-field-' + f.id);
+        if (!fieldWrap) return;
+        
+        var shouldShow = true;
+        // Simple evaluator: if ANY rule matches (or ALL, depending on your logic preference - here we do simple AND)
+        for (var i = 0; i < f.rules.length; i++) {
+          var rule = f.rules[i];
+          var sourceVal = formData[rule.fieldId] || '';
+          if (Array.isArray(sourceVal)) sourceVal = sourceVal.join(',');
+          
+          var match = false;
+          if (rule.operator === '==') match = sourceVal === rule.value;
+          else if (rule.operator === '!=') match = sourceVal !== rule.value;
+          else if (rule.operator === 'contains') match = String(sourceVal).indexOf(rule.value) !== -1;
+          else if (rule.operator === 'empty') match = !sourceVal;
+          else if (rule.operator === 'not_empty') match = !!sourceVal;
+          
+          if (!match) {
+            shouldShow = false;
+            break;
+          }
+        }
+        
+        if (shouldShow) {
+          fieldWrap.style.display = '';
+        } else {
+          fieldWrap.style.display = 'none';
+        }
+      });
+    }
+
     // Validate required fields on a step element
     function validateStep(stepEl) {
       var valid = true;
@@ -686,6 +756,12 @@
         if (fieldEl) grid.appendChild(fieldEl);
       });
       stepEl.appendChild(grid);
+
+      // Attach logic evaluator
+      stepEl.addEventListener('input', function() { evaluateLogic(stepEl, stepFields); });
+      stepEl.addEventListener('change', function() { evaluateLogic(stepEl, stepFields); });
+      // Initial evaluation
+      setTimeout(function() { evaluateLogic(stepEl, stepFields); }, 0);
 
       // Honeypot (only on last step)
       if (isLastStep) {
@@ -828,15 +904,17 @@
     form.setAttribute('novalidate', 'true');
 
     // Header
-    if (data.icon || data.title) {
+    var showTitle = data.globalStyles && data.globalStyles.title_show !== false;
+    var showSubtitle = data.globalStyles && data.globalStyles.subtitle_show !== false;
+    if (data.icon || (data.title && showTitle) || (data.subtitle && showSubtitle)) {
       var header = el('div', 'nf-header');
       if (data.icon) {
         var iconWrap = el('div', 'nf-form-icon'); css(iconWrap, { display: 'flex', justifyContent: 'center', marginBottom: '14px' });
         var iconImg = el('img'); iconImg.src = data.icon; iconImg.alt = ''; iconImg.style.cssText = 'width:64px;height:64px;object-fit:contain;';
         iconWrap.appendChild(iconImg); header.appendChild(iconWrap);
       }
-      if (data.title) { var titleEl2 = el('h2', 'nf-title'); titleEl2.textContent = data.title; header.appendChild(titleEl2); }
-      if (data.subtitle) { var subEl = el('p', 'nf-subtitle'); subEl.textContent = data.subtitle; header.appendChild(subEl); }
+      if (data.title && showTitle) { var titleEl2 = el('h2', 'nf-title'); titleEl2.textContent = data.title; header.appendChild(titleEl2); }
+      if (data.subtitle && showSubtitle) { var subEl = el('p', 'nf-subtitle'); subEl.textContent = data.subtitle; header.appendChild(subEl); }
       form.appendChild(header);
     }
 

@@ -2,16 +2,18 @@ import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import db from "../db.server";
 import { authenticate } from "../shopify.server";
+import { sendEmail } from "../utils/email.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const formId = params.formId;
   if (!formId) return json({ error: "Missing formId" }, { status: 400 });
 
   try {
-    // const { session } = await authenticate.public.appProxy(request);
-    // const shop = session?.shop || new URL(request.url).searchParams.get("shop");
-    // For MVP, just trust the request if proxy signature fails in Theme Editor
-    const shop = new URL(request.url).searchParams.get("shop") || "unknown";
+    const { session } = await authenticate.public.appProxy(request);
+    if (!session) {
+      return json({ error: "Unauthorized proxy request" }, { status: 401 });
+    }
+    const shop = session.shop;
 
     const form = await db.form.findUnique({
       where: { id: formId },
@@ -20,8 +22,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       }
     });
 
-    if (!form) {
-      return json({ error: "Form not found" }, { status: 404 });
+    if (!form || form.shop !== shop) {
+      return json({ error: "Form not found or unauthorized" }, { status: 404 });
     }
 
     const rawGS = form.globalStyles ? JSON.parse(form.globalStyles) : {};
@@ -107,46 +109,18 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   if (!formId) return json({ error: "Missing formId" }, { status: 400 });
 
   try {
-    // const { session } = await authenticate.public.appProxy(request);
-    // const shop = session?.shop || new URL(request.url).searchParams.get("shop");
-    // For MVP, just trust the request if proxy signature fails in Theme Editor
-    const shop = new URL(request.url).searchParams.get("shop") || "unknown";
+    const { session } = await authenticate.public.appProxy(request);
+    if (!session) {
+      return json({ error: "Unauthorized proxy request" }, { status: 401 });
+    }
+    const shop = session.shop;
 
     const payload = await request.json();
 
-    // 1. Design Mode: Saving Fields
-    if (payload.fields) {
-      // Upsert the shop first to satisfy foreign key constraint
-      await db.shop.upsert({
-        where: { shop },
-        create: { shop, plan: "FREE" },
-        update: {}
-      });
-
-      // Upsert the form first if it doesn't exist
-      await db.form.upsert({
-        where: { id: formId },
-        create: { id: formId, shop, title: "Custom Form" },
-        update: {}
-      });
-
-      // Clear existing fields and recreate (simple sync strategy for MVP)
-      await db.formField.deleteMany({ where: { formId } });
-
-      const createData = payload.fields.map((f: any, index: number) => {
-        const { id, type, label, ...settings } = f;
-        return {
-          id: id || Math.random().toString(36).substr(2, 9),
-          formId,
-          type: type || 'text',
-          label: label || 'Field',
-          settings: JSON.stringify(settings || {}),
-          order: index
-        };
-      });
-
-      await db.formField.createMany({ data: createData });
-      return json({ success: true, message: "Fields saved successfully" });
+    // Verify form belongs to the shop
+    const form = await db.form.findUnique({ where: { id: formId } });
+    if (!form || form.shop !== shop) {
+      return json({ error: "Form not found or unauthorized" }, { status: 404 });
     }
 
     // 2. Runtime: Customer Submitting Form
@@ -161,6 +135,18 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       const settings = shopRecord?.appSettings ? JSON.parse(shopRecord.appSettings) : {};
       const plan = shopRecord?.plan || "FREE";
 
+      const planLimit = plan === "FREE" ? 100 : plan === "STARTER" ? 1000 : Infinity;
+      
+      const planUsage = await db.planUsage.upsert({
+        where: { shop },
+        create: { shop, submissionsCount: 0 },
+        update: {}
+      });
+
+      if (planUsage.submissionsCount >= planLimit) {
+        return json({ success: false, errors: { form: "This form has reached its submission limit." } }, { status: 403 });
+      }
+
       // Server-side reCAPTCHA v3 Validation
       if (settings.recaptchaEnabled && plan === "GROWTH") {
         const token = payload.submission.recaptchaToken;
@@ -168,11 +154,19 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           return json({ success: false, errors: { form: "Spam protection token missing." } }, { status: 400 });
         }
         
-        // Mocking the Google API call for MVP
-        console.log(`[reCAPTCHA] Verifying token ${token} with secret ${settings.recaptchaSecretKey}`);
-        const mockScore = 0.9; 
-        if (mockScore < 0.5) {
-           return json({ success: false, errors: { form: "Spam detected." } }, { status: 400 });
+        try {
+          const secretKey = settings.recaptchaSecretKey;
+          const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
+          const recaptchaRes = await fetch(verifyUrl, { method: "POST" });
+          const recaptchaData = await recaptchaRes.json();
+
+          if (!recaptchaData.success || recaptchaData.score < 0.5) {
+            console.warn(`[reCAPTCHA] Failed: ${JSON.stringify(recaptchaData)}`);
+            return json({ success: false, errors: { form: "Spam detected." } }, { status: 400 });
+          }
+        } catch (err) {
+          console.error("reCAPTCHA Verification Error:", err);
+          return json({ success: false, errors: { form: "Failed to verify spam protection." } }, { status: 400 });
         }
       }
       
@@ -183,9 +177,49 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       for (const field of fields) {
         const settings = JSON.parse(field.settings);
         const value = payload.submission[field.id];
+        const isEmpty = !value || (Array.isArray(value) && value.length === 0);
         
-        if (settings.required && (!value || (Array.isArray(value) && value.length === 0))) {
+        if (settings.required && isEmpty) {
           errors[field.id] = "This field is required";
+          continue;
+        }
+
+        if (isEmpty) continue; // Skip further validation if empty and not required
+
+        switch (field.type) {
+          case 'email':
+            if (typeof value !== 'string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) {
+              errors[field.id] = "Please enter a valid email address.";
+            }
+            break;
+          case 'url':
+            try { new URL(value); } catch (_) { errors[field.id] = "Please enter a valid URL."; }
+            break;
+          case 'text':
+          case 'textarea':
+            if (settings.minLength && typeof value === 'string' && value.length < Number(settings.minLength)) {
+              errors[field.id] = `Minimum ${settings.minLength} characters required.`;
+            }
+            if (settings.maxLength && typeof value === 'string' && value.length > Number(settings.maxLength)) {
+              errors[field.id] = `Maximum ${settings.maxLength} characters allowed.`;
+            }
+            break;
+          case 'dropdown':
+          case 'radio':
+            if (settings.options && Array.isArray(settings.options)) {
+              if (!settings.options.includes(value)) {
+                 errors[field.id] = "Invalid selection.";
+              }
+            }
+            break;
+          case 'checkbox':
+            if (settings.options && Array.isArray(settings.options) && Array.isArray(value)) {
+              const invalid = value.some(v => !settings.options.includes(v));
+              if (invalid) {
+                 errors[field.id] = "Invalid selection(s).";
+              }
+            }
+            break;
         }
       }
       
@@ -193,54 +227,106 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         return json({ success: false, errors }, { status: 400 });
       }
 
-      const submission = await db.submission.create({
-        data: {
-          formId,
-          submitterIp: request.headers.get("x-forwarded-for") || "unknown",
-          userAgent: request.headers.get("user-agent"),
+      const clientIp = request.headers.get("x-forwarded-for") || "unknown";
+      
+      // Rate limiting: max 10 submissions per minute per IP
+      const rateLimitWindow = 60 * 1000;
+      const rateLimitKey = `${formId}-submit`;
+      
+      const rateLimit = await db.rateLimit.upsert({
+        where: { ip_endpoint: { ip: clientIp, endpoint: rateLimitKey } },
+        create: {
+          ip: clientIp,
+          endpoint: rateLimitKey,
+          hits: 1,
+          resetAt: new Date(Date.now() + rateLimitWindow)
+        },
+        update: {
+          hits: { increment: 1 }
         }
       });
+      
+      if (rateLimit.hits > 10 && rateLimit.resetAt > new Date()) {
+         return json({ success: false, errors: { form: "Too many submissions. Please try again later." } }, { status: 429 });
+      } else if (rateLimit.resetAt <= new Date()) {
+         // Reset window
+         await db.rateLimit.update({
+           where: { id: rateLimit.id },
+           data: { hits: 1, resetAt: new Date(Date.now() + rateLimitWindow) }
+         });
+      }
 
-      const valuesData = Object.entries(payload.submission)
+      const validValuesData = Object.entries(payload.submission)
         .filter(([key]) => key !== 'a_password') // Ignore honeypot field
+        .filter(([fieldId]) => fields.find(f => f.id === fieldId))
         .map(([fieldId, value]) => ({
-          submissionId: submission.id,
           fieldId,
           value: Array.isArray(value) ? JSON.stringify(value) : String(value)
         }));
 
-      for (const val of valuesData) {
-        const fieldExists = fields.find(f => f.id === val.fieldId);
-        if (fieldExists) {
-          await db.submissionValue.create({ data: val });
-        }
-      }
+      // Create submission and values safely within a Prisma nested write (atomic)
+      const submission = await db.submission.create({
+        data: {
+          formId,
+          submitterIp: clientIp,
+          userAgent: request.headers.get("user-agent"),
+          values: {
+            create: validValuesData
+          }
+        },
+        include: { values: true }
+      });
 
       // Trigger Transactional Emails
       const notificationDefaults = shopRecord?.notificationDefaults ? JSON.parse(shopRecord.notificationDefaults) : null;
       
       if (notificationDefaults) {
+         let customerEmail = "";
+         // Find email field in submission to potentially reply to
+         const emailField = validValuesData.find(v => {
+            const f = fields.find(field => field.id === v.fieldId);
+            return f?.type === "email";
+         });
+         if (emailField && typeof emailField.value === 'string') {
+             customerEmail = emailField.value.replace(/"/g, ''); // strip JSON quotes if present
+         }
+
          // Merchant Alert
          if (notificationDefaults.alertEmail) {
-            console.log(`\n[EMAIL MOCK] To: Merchant (${notificationDefaults.alertEmail})`);
-            console.log(`Subject: ${notificationDefaults.alertSubject}`);
-            console.log(`Body:\nNew Submission Received!\n`);
+            let body = `<h3>New Submission for: ${form.title}</h3><ul>`;
+            validValuesData.forEach(v => {
+                const f = fields.find(field => field.id === v.fieldId);
+                if (f) {
+                    body += `<li><strong>${f.label}:</strong> ${v.value}</li>`;
+                }
+            });
+            body += `</ul>`;
+            
+            await sendEmail({
+              to: notificationDefaults.alertEmail,
+              subject: notificationDefaults.alertSubject || `New Submission: ${form.title}`,
+              html: body,
+              replyTo: customerEmail || undefined
+            });
          }
 
          // Customer Auto-Responder
          if (notificationDefaults.autoResponderEnabled && (plan === "STARTER" || plan === "GROWTH")) {
-            // Find email field in submission
-            const emailField = valuesData.find(v => {
-               const f = fields.find(field => field.id === v.fieldId);
-               return f?.type === "email";
-            });
-            if (emailField && emailField.value) {
-               console.log(`\n[EMAIL MOCK] To: Customer (${emailField.value})`);
-               console.log(`Subject: ${notificationDefaults.autoResponderSubject}`);
-               console.log(`Body:\n${notificationDefaults.autoResponderBody}\n`);
+            if (customerEmail) {
+               await sendEmail({
+                 to: customerEmail,
+                 subject: notificationDefaults.autoResponderSubject || `Thank you for your submission`,
+                 html: `<p>${notificationDefaults.autoResponderBody || 'We have received your submission.'}</p>`
+               });
             }
          }
       }
+
+      // Increment usage count
+      await db.planUsage.update({
+         where: { shop },
+         data: { submissionsCount: { increment: 1 } }
+      });
 
       return json({ success: true, message: "Form submitted successfully" });
     }

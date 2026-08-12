@@ -46,6 +46,45 @@ export const loader = async ({ request }: any) => {
   return json({ submissions });
 };
 
+function ValueRenderer({ value }: { value: string }) {
+  // Check if JSON array
+  if (value.startsWith('[') && value.endsWith(']')) {
+    try {
+      const arr = JSON.parse(value);
+      if (Array.isArray(arr)) {
+        return (
+          <InlineStack gap="100">
+            {arr.map((item, i) => (
+              <Badge key={i}>{String(item)}</Badge>
+            ))}
+          </InlineStack>
+        );
+      }
+    } catch (e) {
+      // Not a valid JSON array, fall through
+    }
+  }
+
+  // Check if File Upload URL
+  if (value.startsWith('/uploads/')) {
+    return (
+      <Button size="micro" url={value} target="_blank">
+        View File
+      </Button>
+    );
+  }
+  
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return (
+      <a href={value} target="_blank" rel="noreferrer" style={{color: '#2c6ecb', textDecoration: 'underline'}}>
+        {value}
+      </a>
+    );
+  }
+
+  return <Text variant="bodyMd" as="p">{value}</Text>;
+}
+
 export default function Submissions() {
   const { submissions } = useLoaderData<typeof loader>();
   const [activeSubmission, setActiveSubmission] = useState<any | null>(null);
@@ -184,7 +223,7 @@ export default function Submissions() {
                       {val.field.label.toUpperCase()}
                     </Text>
                     <Box paddingBlockStart="100">
-                      <Text variant="bodyMd" as="p">{val.value}</Text>
+                      <ValueRenderer value={val.value} />
                     </Box>
                   </Box>
                 ))}

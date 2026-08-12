@@ -17,6 +17,10 @@ export default function Integrations() {
   const { plan } = useLoaderData<typeof loader>();
   const isGrowth = plan === "GROWTH";
 
+  const handleConnect = () => {
+    shopify.toast.show('Integration coming soon!');
+  };
+
   return (
     <Page title="Integrations" subtitle="Connect your forms to third-party services.">
       <Layout>
@@ -36,7 +40,7 @@ export default function Integrations() {
                   <Text as="h2" variant="headingMd">Klaviyo</Text>
                   <Text as="p" tone="subdued">Automatically sync new form submissions to a Klaviyo list.</Text>
                 </BlockStack>
-                <Button disabled={!isGrowth}>Connect Klaviyo</Button>
+                <Button disabled={!isGrowth} onClick={handleConnect}>Connect Klaviyo</Button>
               </InlineStack>
             </Card>
 
@@ -46,7 +50,7 @@ export default function Integrations() {
                   <Text as="h2" variant="headingMd">Google Sheets</Text>
                   <Text as="p" tone="subdued">Append new form submissions directly to a Google Sheet.</Text>
                 </BlockStack>
-                <Button disabled={!isGrowth}>Connect Google Sheets</Button>
+                <Button disabled={!isGrowth} onClick={handleConnect}>Connect Google Sheets</Button>
               </InlineStack>
             </Card>
 
@@ -56,7 +60,7 @@ export default function Integrations() {
                   <Text as="h2" variant="headingMd">Zapier</Text>
                   <Text as="p" tone="subdued">Connect to thousands of apps using Zapier webhooks.</Text>
                 </BlockStack>
-                <Button disabled={!isGrowth}>Connect Zapier</Button>
+                <Button disabled={!isGrowth} onClick={handleConnect}>Connect Zapier</Button>
               </InlineStack>
             </Card>
           </BlockStack>

@@ -10,7 +10,7 @@ generator client {
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
   provider = "sqlite"
-  url      = "file:dev.sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
@@ -62,6 +62,8 @@ model Form {
   notification    NotificationSetting?
   integrations    Integration[]
   globalStyles    String? // JSON string containing global form styling configurations
+
+  @@index([shop])
 }
 
 model FormField {
@@ -77,6 +79,8 @@ model FormField {
   updatedAt       DateTime @updatedAt
 
   submissionValues SubmissionValue[]
+
+  @@index([formId])
 }
 
 model Submission {
@@ -91,6 +95,10 @@ model Submission {
   createdAt       DateTime @default(now())
 
   values          SubmissionValue[]
+
+  @@index([formId])
+  @@index([createdAt])
+  @@index([submitterIp])
 }
 
 model SubmissionValue {
