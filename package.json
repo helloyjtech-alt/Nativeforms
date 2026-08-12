@@ -59,7 +59,7 @@
     "preact": "^10.29.8",
     "prettier": "^3.2.4",
     "selfsigned": "^5.5.0",
-    "typescript": "^5.2.2",
+    "typescript": "^7.0.2",
     "vite": "^6.2.2"
   },
   "workspaces": {
