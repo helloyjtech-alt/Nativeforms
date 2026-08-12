@@ -2727,18 +2727,41 @@ export default function FormBuilder() {
                           <div style={{ marginBottom: '20px' }}><Select label="Button size" options={[{label:'Small',value:'sm'},{label:'Medium',value:'md'},{label:'Large',value:'lg'}]} value={getGS('button_size') || 'md'} onChange={(v) => updateGlobalStyle('button_size', v, styleState)} /></div>
                         </Accordion>
                         
-                        <Accordion title={`10. Interaction states (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Focus ring color" value={getGS('focus_color') || '#3b82f6'} onChange={(v:any) => updateGlobalStyle('focus_color', v, styleState)} />
-                          <SliderControl label="Focus ring width" value={getGS('focus_width') || '2px'} onChange={(v:any) => updateGlobalStyle('focus_width', v, styleState)} min={1} max={10} />
-                          <SliderControl label="Disabled opacity" value={getGS('disabled_opacity') || '0.5'} onChange={(v:any) => updateGlobalStyle('disabled_opacity', v, styleState)} min={0} max={1} step={0.1} />
+                        <Accordion title={`10. Choice Fields (Radio & Checkbox) (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Tick/Checkmark color" value={getGS('choice_tickColor') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('choice_tickColor', v, styleState)} />
+                          <ColorControl label="Unchecked background" value={getGS('choice_uncheckedBg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('choice_uncheckedBg', v, styleState)} />
+                          <ColorControl label="Checked background" value={getGS('choice_checkedBg') || '#6366f1'} onChange={(v:any) => updateGlobalStyle('choice_checkedBg', v, styleState)} />
+                          <SliderControl label="Checkbox border radius" value={getGS('choice_radius') || '4px'} onChange={(v:any) => updateGlobalStyle('choice_radius', v, styleState)} min={0} max={20} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Options Layout" options={[{label:'Column (Vertical)',value:'column'},{label:'Row (Horizontal)',value:'row'}]} value={getGS('choice_flexDirection') || 'column'} onChange={(v) => updateGlobalStyle('choice_flexDirection', v, styleState)} /></div>
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Choice Button/Box Styles</div>
+                          <ColorControl label="Active/Selected background" value={getGS('choice_activeBg') || 'rgba(99,102,241,0.05)'} onChange={(v:any) => updateGlobalStyle('choice_activeBg', v, styleState)} />
+                          <ColorControl label="Active/Selected border" value={getGS('choice_activeBorder') || '#6366f1'} onChange={(v:any) => updateGlobalStyle('choice_activeBorder', v, styleState)} />
+                        </Accordion>
+
+                        <Accordion title={`11. Dropdowns & Selects (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Dropdown panel background" value={getGS('dropdown_panelBg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('dropdown_panelBg', v, styleState)} />
+                          <SliderControl label="Panel border radius" value={getGS('dropdown_radius') || '8px'} onChange={(v:any) => updateGlobalStyle('dropdown_radius', v, styleState)} min={0} max={30} />
+                          <ShadowControl label="Panel box shadow" value={getGS('dropdown_shadow') || '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)'} onChange={(v:any) => updateGlobalStyle('dropdown_shadow', v, styleState)} />
+                          <ColorControl label="Option hover background" value={getGS('dropdown_hoverBg') || '#f1f5f9'} onChange={(v:any) => updateGlobalStyle('dropdown_hoverBg', v, styleState)} />
+                          <ColorControl label="Option text color" value={getGS('dropdown_textColor') || '#1e293b'} onChange={(v:any) => updateGlobalStyle('dropdown_textColor', v, styleState)} />
                         </Accordion>
                         
-                        <Accordion title={`11. Misc / branding (${styleState})`} defaultOpen={false}>
+                        <Accordion title={`12. File Upload Fields (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Upload box background" value={getGS('upload_bg') || '#f8fafc'} onChange={(v:any) => updateGlobalStyle('upload_bg', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Border style" options={[{label:'Dashed',value:'dashed'},{label:'Solid',value:'solid'},{label:'Dotted',value:'dotted'}]} value={getGS('upload_borderStyle') || 'dashed'} onChange={(v) => updateGlobalStyle('upload_borderStyle', v, styleState)} /></div>
+                          <ColorControl label="Upload box border color" value={getGS('upload_borderColor') || '#cbd5e1'} onChange={(v:any) => updateGlobalStyle('upload_borderColor', v, styleState)} />
+                          <ColorControl label="Drag-over background" value={getGS('upload_dragBg') || '#e0e7ff'} onChange={(v:any) => updateGlobalStyle('upload_dragBg', v, styleState)} />
+                          <ColorControl label="Icon/Text color" value={getGS('upload_iconColor') || '#64748b'} onChange={(v:any) => updateGlobalStyle('upload_iconColor', v, styleState)} />
+                          <SliderControl label="Icon size" value={getGS('upload_iconSize') || '24px'} onChange={(v:any) => updateGlobalStyle('upload_iconSize', v, styleState)} min={12} max={64} />
+                        </Accordion>
+                        
+                        <Accordion title={`13. Misc / branding (${styleState})`} defaultOpen={false}>
                           <ColorControl label="Loading-spinner color" value={getGS('spinner_color') || '#000000'} onChange={(v:any) => updateGlobalStyle('spinner_color', v, styleState)} />
                           <ColorControl label="Progress-bar accent color" value={getGS('progress_color') || '#000000'} onChange={(v:any) => updateGlobalStyle('progress_color', v, styleState)} />
                         </Accordion>
                         
-                        <Accordion title={`12. Step Navigation (${styleState})`} defaultOpen={false}>
+                        <Accordion title={`14. Step Navigation (${styleState})`} defaultOpen={false}>
                           <div style={{ padding: '8px 0 12px', marginBottom: '12px', backgroundColor: '#f0f4ff', borderRadius: '6px', padding: '10px 12px', fontSize: '12px', color: '#3b5fc0' }}>Controls the look of multi-step forms. Single-page forms are unaffected.</div>
                           <ColorControl label="Progress fill color" value={getGS('step_fillColor') || '#7c3aed'} onChange={(v:any) => updateGlobalStyle('step_fillColor', v, styleState)} />
                           <ColorControl label="Progress track color" value={getGS('step_trackColor') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('step_trackColor', v, styleState)} />
