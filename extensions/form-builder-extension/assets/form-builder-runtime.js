@@ -26,6 +26,21 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function css(el, styles) { Object.assign(el.style, styles); }
 
+  function renderTopErrors(container, errors, gs) {
+    var topBox = el('div', 'nf-error-msg nf-top-errors');
+    topBox.style.cssText = 'flex-direction: column; align-items: flex-start; margin-bottom: 16px; width: 100%;';
+    var header = el('div');
+    var iconHtml = (gs.error_showIcon !== false) ? ICO.error : '';
+    header.innerHTML = iconHtml + '<span>Please fix the following errors:</span>';
+    header.style.cssText = 'display: flex; align-items: center; gap: 6px; font-weight: bold; margin-bottom: 8px;';
+    var ul = el('ul');
+    ul.style.cssText = 'margin: 0; padding-left: 24px; text-align: left; width: 100%;';
+    errors.forEach(function (e) { var li = el('li'); li.textContent = e; ul.appendChild(li); });
+    topBox.appendChild(header);
+    topBox.appendChild(ul);
+    container.insertBefore(topBox, container.firstChild);
+  }
+
   /* ─── CSS VARIABLES ───────────────────────────────────────────────────────── */
   function applyGlobalStyles(container, gs) {
     var defaults = {
@@ -651,9 +666,11 @@
       var valid = true;
       // Clear previous errors
       stepEl.querySelectorAll('.nf-error-msg').forEach(function (e) { e.remove(); });
+      stepEl.querySelectorAll('.nf-top-errors').forEach(function (e) { e.remove(); });
       stepEl.querySelectorAll('[data-error="true"]').forEach(function (e) { e.removeAttribute('data-error'); });
 
       var page = pages[currentStep];
+      var topErrors = [];
       page.forEach(function (f) {
         if (!f.required) return;
         var fieldWrap = stepEl.querySelector('#nf-field-' + f.id);
@@ -671,11 +688,20 @@
         if (!hasValue) {
           valid = false;
           fieldWrap.setAttribute('data-error', 'true');
-          var errMsg = el('div', 'nf-error-msg');
-          errMsg.innerHTML = ICO.error + '<span>This field is required</span>';
-          fieldWrap.appendChild(errMsg);
+          var errorTxt = 'This field is required';
+          if (gs.error_position === 'top') {
+            topErrors.push((f.label || 'Field') + ': ' + errorTxt);
+          } else {
+            var errMsg = el('div', 'nf-error-msg');
+            var iconHtml = (gs.error_showIcon !== false) ? ICO.error : '';
+            errMsg.innerHTML = iconHtml + '<span>' + errorTxt + '</span>';
+            fieldWrap.appendChild(errMsg);
+          }
         }
       });
+      if (topErrors.length > 0) {
+        renderTopErrors(stepEl, topErrors, gs);
+      }
       return valid;
     }
 
@@ -838,15 +864,24 @@
               submitLbl.textContent = data.submitLabel || 'Submit';
               submitBtn.disabled = false;
               if (err && err.errors) {
+                var topErrs = [];
                 Object.keys(err.errors).forEach(function (fid) {
                   var target = stepEl.querySelector(fid === 'form' ? '.nf-step-nav' : '#nf-field-' + fid);
                   if (target) {
                     target.setAttribute('data-error', 'true');
-                    var errMsg = el('div', 'nf-error-msg');
-                    errMsg.innerHTML = ICO.error + '<span>' + esc(String(err.errors[fid])) + '</span>';
-                    target.appendChild(errMsg);
+                    var errorTxt = String(err.errors[fid]);
+                    if (gs.error_position === 'top') {
+                      var fieldName = fid === 'form' ? 'Form' : (target.querySelector('.nf-label') ? target.querySelector('.nf-label').textContent : 'Field');
+                      topErrs.push(fieldName + ': ' + errorTxt);
+                    } else {
+                      var errMsg = el('div', 'nf-error-msg');
+                      var iconHtml = (gs.error_showIcon !== false) ? ICO.error : '';
+                      errMsg.innerHTML = iconHtml + '<span>' + esc(errorTxt) + '</span>';
+                      target.appendChild(errMsg);
+                    }
                   }
                 });
+                if (topErrs.length > 0) renderTopErrors(stepEl, topErrs, gs);
               }
             });
         });
@@ -956,10 +991,25 @@
         .catch(function (err) {
           submitLbl2.textContent = data.submitLabel || 'Submit'; submitBtn2.disabled = false;
           if (err && err.errors) {
+            var gs = data.globalStyles || {};
+            var topErrs = [];
             Object.keys(err.errors).forEach(function (fid) {
               var target = form.querySelector(fid === 'form' ? '.nf-actions' : '#nf-field-' + fid);
-              if (target) { target.setAttribute('data-error', 'true'); var errMsg2 = el('div', 'nf-error-msg'); errMsg2.innerHTML = ICO.error + '<span>' + esc(String(err.errors[fid])) + '</span>'; target.appendChild(errMsg2); }
+              if (target) { 
+                target.setAttribute('data-error', 'true'); 
+                var errorTxt = String(err.errors[fid]);
+                if (gs.error_position === 'top') {
+                  var fieldName = fid === 'form' ? 'Form' : (target.querySelector('.nf-label') ? target.querySelector('.nf-label').textContent : 'Field');
+                  topErrs.push(fieldName + ': ' + errorTxt);
+                } else {
+                  var errMsg2 = el('div', 'nf-error-msg'); 
+                  var iconHtml = (gs.error_showIcon !== false) ? ICO.error : '';
+                  errMsg2.innerHTML = iconHtml + '<span>' + esc(errorTxt) + '</span>'; 
+                  target.appendChild(errMsg2); 
+                }
+              }
             });
+            if (topErrs.length > 0) renderTopErrors(form, topErrs, gs);
           }
         });
     });

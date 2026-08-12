@@ -2626,45 +2626,95 @@ export default function FormBuilder() {
                           <div style={{ marginBottom: '20px' }}><Select label="Direction" options={[{label:'LTR (Left-to-Right)',value:'ltr'},{label:'RTL (Right-to-Left)',value:'rtl'}]} value={getGS('direction') || 'ltr'} onChange={(v) => updateGlobalStyle('direction', v, styleState)} /></div>
                         </Accordion>
                         
-                        <Accordion title={`5. Global Typography (${styleState})`} defaultOpen={false}>
+                        <Accordion title={`5. Global Typography (${styleState})`} defaultOpen={styleState === 'default'}>
                           <div style={{ marginBottom: '20px' }}><Select label="Base font family" options={[{label:'System Default',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'},{label:'Outfit',value:'Outfit, sans-serif'}]} value={getGS('fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('fontFamily', v, styleState)} /></div>
                           <SliderControl label="Base font size / scale" value={getGS('fontSize') || '16px'} onChange={(v:any) => updateGlobalStyle('fontSize', v, styleState)} min={12} max={32} />
                           <div style={{ marginBottom: '20px' }}><Select label="Font weight scale" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('fontWeight') || '400'} onChange={(v) => updateGlobalStyle('fontWeight', v, styleState)} /></div>
                           <SliderControl label="Base line height" value={getGS('lineHeight') || '1.5'} onChange={(v:any) => updateGlobalStyle('lineHeight', v, styleState)} min={1} max={3} />
+                          <ColorControl label="Text color" value={getGS('text_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('text_color', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Text decoration" options={[{label:'None',value:'none'},{label:'Underline',value:'underline'}]} value={getGS('text_decoration') || 'none'} onChange={(v) => updateGlobalStyle('text_decoration', v, styleState)} /></div>
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Labels</div>
+                          <div style={{ marginBottom: '20px' }}><Select label="Label font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('label_fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('label_fontFamily', v, styleState)} /></div>
+                          <SliderControl label="Label size" value={getGS('label_fontSize') || '14px'} onChange={(v:any) => updateGlobalStyle('label_fontSize', v, styleState)} min={10} max={24} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Label weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('label_fontWeight') || '500'} onChange={(v) => updateGlobalStyle('label_fontWeight', v, styleState)} /></div>
+                          <div style={{ marginBottom: '20px' }}><Select label="Label transform" options={[{label:'None',value:'none'},{label:'Uppercase',value:'uppercase'},{label:'Lowercase',value:'lowercase'},{label:'Capitalize',value:'capitalize'}]} value={getGS('label_transform') || 'none'} onChange={(v) => updateGlobalStyle('label_transform', v, styleState)} /></div>
+                          <ColorControl label="Label color" value={getGS('label_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('label_color', v, styleState)} />
+                          <SliderControl label="Label margin bottom" value={getGS('label_marginBottom') || '4px'} onChange={(v:any) => updateGlobalStyle('label_marginBottom', v, styleState)} min={0} max={20} />
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Help Text</div>
+                          <SliderControl label="Help text size" value={getGS('help_fontSize') || '12px'} onChange={(v:any) => updateGlobalStyle('help_fontSize', v, styleState)} min={10} max={20} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Help text weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('help_fontWeight') || '400'} onChange={(v) => updateGlobalStyle('help_fontWeight', v, styleState)} /></div>
+                          <ColorControl label="Help text color" value={getGS('help_color') || '#6d7175'} onChange={(v:any) => updateGlobalStyle('help_color', v, styleState)} />
+                          <SliderControl label="Help text line height" value={getGS('help_lineHeight') || '1.4'} onChange={(v:any) => updateGlobalStyle('help_lineHeight', v, styleState)} min={1} max={2} step={0.1} />
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Required Asterisk</div>
+                          <ColorControl label="Asterisk color" value={getGS('asterisk_color') || '#d92d20'} onChange={(v:any) => updateGlobalStyle('asterisk_color', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Asterisk style" options={[{label:'* (Asterisk)',value:'asterisk'},{label:'(required)',value:'text'}]} value={getGS('asterisk_style') || 'asterisk'} onChange={(v) => updateGlobalStyle('asterisk_style', v, styleState)} /></div>
                         </Accordion>
 
                         <Accordion title={`6. Standard Input Fields (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Field background" value={getGS('input_bg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('input_bg', v, styleState)} />
+                          <ColorControl label="Background" value={getGS('input_bg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('input_bg', v, styleState)} />
                           <ColorControl label="Border color" value={getGS('input_border') || '#cbd5e0'} onChange={(v:any) => updateGlobalStyle('input_border', v, styleState)} />
                           <SliderControl label="Border width" value={getGS('input_border_width') || '1px'} onChange={(v:any) => updateGlobalStyle('input_border_width', v, styleState)} min={0} max={10} />
                           <SliderControl label="Border radius" value={getGS('input_radius') || '8px'} onChange={(v:any) => updateGlobalStyle('input_radius', v, styleState)} min={0} max={50} />
                           <FourWaySpacingControl label="Padding" value={getGS('input_padding') || '12px 16px'} onChange={(v:any) => updateGlobalStyle('input_padding', v, styleState)} />
+                          <TextField label="Height (optional)" value={getGS('input_height') || ''} onChange={(v) => updateGlobalStyle('input_height', v, styleState)} autoComplete="off" />
+                          <ColorControl label="Text color" value={getGS('input_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('input_color', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('input_fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('input_fontFamily', v, styleState)} /></div>
                           <SliderControl label="Font size" value={getGS('input_fontSize') || '16px'} onChange={(v:any) => updateGlobalStyle('input_fontSize', v, styleState)} min={12} max={32} />
                           <div style={{ marginBottom: '20px' }}><Select label="Font weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('input_fontWeight') || '400'} onChange={(v) => updateGlobalStyle('input_fontWeight', v, styleState)} /></div>
-                          <ColorControl label="Text color" value={getGS('input_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('input_color', v, styleState)} />
-                          <ShadowControl label="Box-shadow preset" value={getGS('input_shadow') || ''} onChange={(v:any) => updateGlobalStyle('input_shadow', v, styleState)} />
+                          <ShadowControl label="Box shadow" value={getGS('input_shadow') || ''} onChange={(v:any) => updateGlobalStyle('input_shadow', v, styleState)} />
                         </Accordion>
 
-                        <Accordion title={`7. Label Behavior & Legacy Spacing (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Label color" value={getGS('label_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('label_color', v, styleState)} />
-                          <SliderControl label="Label size" value={getGS('label_fontSize') || '14px'} onChange={(v:any) => updateGlobalStyle('label_fontSize', v, styleState)} min={10} max={24} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Label weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('label_fontWeight') || '500'} onChange={(v) => updateGlobalStyle('label_fontWeight', v, styleState)} /></div>
-                          <ColorControl label="Help-text color" value={getGS('help_color') || '#6d7175'} onChange={(v:any) => updateGlobalStyle('help_color', v, styleState)} />
-                          <SliderControl label="Help-text size" value={getGS('help_fontSize') || '12px'} onChange={(v:any) => updateGlobalStyle('help_fontSize', v, styleState)} min={10} max={20} />
-                          <ColorControl label="Required-asterisk color" value={getGS('asterisk_color') || '#d92d20'} onChange={(v:any) => updateGlobalStyle('asterisk_color', v, styleState)} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Required-asterisk style" options={[{label:'*',value:'asterisk'},{label:'(required)',value:'text'}]} value={getGS('asterisk_style') || 'asterisk'} onChange={(v) => updateGlobalStyle('asterisk_style', v, styleState)} /></div>
-                          <div style={{ marginBottom: '20px' }}><Select label="Label alignment" options={[{label:'Left',value:'left'},{label:'Right',value:'right'}]} value={getGS('label_align') || 'left'} onChange={(v) => updateGlobalStyle('label_align', v, styleState)} /></div>
-                          <SliderControl label="Vertical gap between fields" value={getGS('legacy_gap') || '16px'} onChange={(v:any) => updateGlobalStyle('legacy_gap', v, styleState)} min={0} max={100} />
-                          <SliderControl label="Gap between sections" value={getGS('section_gap') || '32px'} onChange={(v:any) => updateGlobalStyle('section_gap', v, styleState)} min={0} max={100} />
+                        <Accordion title={`7. Input State Styling (${styleState})`} defaultOpen={false}>
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Hover State</div>
+                          <ColorControl label="Hover background" value={getGS('input_hoverBg') || ''} onChange={(v:any) => updateGlobalStyle('input_hoverBg', v, styleState)} />
+                          <ColorControl label="Hover border color" value={getGS('input_hoverBorder') || '#94a3b8'} onChange={(v:any) => updateGlobalStyle('input_hoverBorder', v, styleState)} />
+                          <ShadowControl label="Hover box shadow" value={getGS('input_hoverShadow') || ''} onChange={(v:any) => updateGlobalStyle('input_hoverShadow', v, styleState)} />
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Focus State</div>
+                          <ColorControl label="Focus background" value={getGS('input_focusBg') || ''} onChange={(v:any) => updateGlobalStyle('input_focusBg', v, styleState)} />
+                          <ColorControl label="Focus border color" value={getGS('input_focusBorder') || '#6366f1'} onChange={(v:any) => updateGlobalStyle('input_focusBorder', v, styleState)} />
+                          <ShadowControl label="Focus box shadow" value={getGS('input_focusShadow') || ''} onChange={(v:any) => updateGlobalStyle('input_focusShadow', v, styleState)} />
+                          <ColorControl label="Focus ring color" value={getGS('input_focusRingColor') || 'rgba(99,102,241,0.18)'} onChange={(v:any) => updateGlobalStyle('input_focusRingColor', v, styleState)} />
+                          <SliderControl label="Focus ring width" value={getGS('input_focusRingWidth') || '3px'} onChange={(v:any) => updateGlobalStyle('input_focusRingWidth', v, styleState)} min={0} max={10} />
+                          <SliderControl label="Focus ring offset" value={getGS('input_focusRingOffset') || '0px'} onChange={(v:any) => updateGlobalStyle('input_focusRingOffset', v, styleState)} min={0} max={10} />
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Error State</div>
+                          <ColorControl label="Error background" value={getGS('input_errorBg') || ''} onChange={(v:any) => updateGlobalStyle('input_errorBg', v, styleState)} />
+                          <ColorControl label="Error border color" value={getGS('input_errorBorder') || '#ef4444'} onChange={(v:any) => updateGlobalStyle('input_errorBorder', v, styleState)} />
+                          <ColorControl label="Error text color" value={getGS('input_errorColor') || '#202223'} onChange={(v:any) => updateGlobalStyle('input_errorColor', v, styleState)} />
+
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Disabled State</div>
+                          <ColorControl label="Disabled background" value={getGS('input_disabledBg') || '#f8fafc'} onChange={(v:any) => updateGlobalStyle('input_disabledBg', v, styleState)} />
+                          <ColorControl label="Disabled border color" value={getGS('input_disabledBorder') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('input_disabledBorder', v, styleState)} />
+                          <SliderControl label="Disabled opacity" value={getGS('input_disabledOpacity') || '0.6'} onChange={(v:any) => updateGlobalStyle('input_disabledOpacity', v, styleState)} min={0} max={1} step={0.1} />
+                        </Accordion>
+
+                        <Accordion title={`8. Placeholder Styling (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Placeholder color" value={getGS('placeholder_color') || '#94a3b8'} onChange={(v:any) => updateGlobalStyle('placeholder_color', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Placeholder font style" options={[{label:'Normal',value:'normal'},{label:'Italic',value:'italic'}]} value={getGS('placeholder_fontStyle') || 'normal'} onChange={(v) => updateGlobalStyle('placeholder_fontStyle', v, styleState)} /></div>
+                          <SliderControl label="Placeholder opacity" value={getGS('placeholder_opacity') || '1'} onChange={(v:any) => updateGlobalStyle('placeholder_opacity', v, styleState)} min={0} max={1} step={0.1} />
                         </Accordion>
                         
-                        <Accordion title={`8. Legacy Global Colors (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Primary (brand/accent)" value={getGS('primary_color') || '#000000'} onChange={(v:any) => updateGlobalStyle('primary_color', v, styleState)} />
-                          <ColorControl label="Secondary" value={getGS('secondary_color') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('secondary_color', v, styleState)} />
-                          <ColorControl label="Text (primary)" value={getGS('text_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('text_color', v, styleState)} />
-                          <ColorControl label="Text (muted/help)" value={getGS('muted_color') || '#6d7175'} onChange={(v:any) => updateGlobalStyle('muted_color', v, styleState)} />
-                          <ColorControl label="Error" value={getGS('error_color') || '#d92d20'} onChange={(v:any) => updateGlobalStyle('error_color', v, styleState)} />
-                          <ColorControl label="Success" value={getGS('success_color') || '#039855'} onChange={(v:any) => updateGlobalStyle('success_color', v, styleState)} />
+                        <Accordion title={`9. Validation Errors (${styleState})`} defaultOpen={false}>
+                          <div style={{ marginBottom: '20px' }}><Select label="Error position" options={[{label:'Below field',value:'below'},{label:'Top of form',value:'top'}]} value={getGS('error_position') || 'below'} onChange={(v) => updateGlobalStyle('error_position', v, styleState)} /></div>
+                          <ColorControl label="Error message text color" value={getGS('error_textColor') || '#ef4444'} onChange={(v:any) => updateGlobalStyle('error_textColor', v, styleState)} />
+                          <SliderControl label="Error message font size" value={getGS('error_fontSize') || '12px'} onChange={(v:any) => updateGlobalStyle('error_fontSize', v, styleState)} min={10} max={20} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Error message font weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('error_fontWeight') || '500'} onChange={(v) => updateGlobalStyle('error_fontWeight', v, styleState)} /></div>
+                          <Checkbox label="Show error icon" checked={getGS('error_showIcon') !== false} onChange={(v) => updateGlobalStyle('error_showIcon', v, styleState)} />
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Error Box (Optional)</div>
+                          <ColorControl label="Error box background" value={getGS('error_bg') || 'transparent'} onChange={(v:any) => updateGlobalStyle('error_bg', v, styleState)} />
+                          <FourWaySpacingControl label="Error box padding" value={getGS('error_padding') || '0px'} onChange={(v:any) => updateGlobalStyle('error_padding', v, styleState)} />
+                          <SliderControl label="Error box border radius" value={getGS('error_radius') || '0px'} onChange={(v:any) => updateGlobalStyle('error_radius', v, styleState)} min={0} max={20} />
                         </Accordion>
 
                         <Accordion title={`9. Buttons (${styleState})`} defaultOpen={false}>
