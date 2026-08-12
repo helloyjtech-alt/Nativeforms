@@ -1319,7 +1319,7 @@ export default function FormBuilder() {
   const globalStyles = formState.globalStyles;
 
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [styleState, setStyleState] = useState<'default' | 'hover' | 'focus' | 'error' | 'disabled'>('default');
+  const [styleState, setStyleState] = useState<'default' | 'hover' | 'focus' | 'active' | 'error' | 'disabled'>('default');
   const resolvedGlobalStyles = resolveGlobalStyle(globalStyles, viewMode);
 
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
@@ -2565,7 +2565,7 @@ export default function FormBuilder() {
             {rightTab === 'style' && selectedField?.type !== 'hidden' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', gap: '8px', paddingBottom: '16px', borderBottom: '1px solid var(--p-color-border-subdued)' }}>
-                  {['default', 'hover', 'focus', 'error', 'disabled'].map(st => (
+                  {['default', 'hover', 'focus', 'active', 'error', 'disabled'].map(st => (
                     <div key={st} onClick={() => setStyleState(st as any)} style={{ padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', backgroundColor: styleState === st ? '#202223' : 'transparent', color: styleState === st ? '#ffffff' : 'var(--p-color-text)', fontSize: '13px', fontWeight: 500, textTransform: 'capitalize' }}>
                       {st}
                     </div>
@@ -2844,6 +2844,9 @@ export default function FormBuilder() {
                           <ColorControl label="Dot color" value={getGS('radio_dotColor') || '#ffffff'} darkValue={getGS('radio_dotColor_dark') || ''} onChange={(v:any) => updateGlobalStyle('radio_dotColor', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('radio_dotColor_dark', v, styleState)} />
                           <ColorControl label="Focus ring color" value={getGS('radio_focusRing') || 'rgba(99,102,241,0.2)'} darkValue={getGS('radio_focusRing_dark') || ''} onChange={(v:any) => updateGlobalStyle('radio_focusRing', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('radio_focusRing_dark', v, styleState)} />
                           <ColorControl label="Row hover background" value={getGS('radio_hoverBg') || 'transparent'} darkValue={getGS('radio_hoverBg_dark') || ''} onChange={(v:any) => updateGlobalStyle('radio_hoverBg', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('radio_hoverBg_dark', v, styleState)} />
+                          {styleState === 'active' && (
+                            <ColorControl label="Active/Pressed background" value={getGS('radio_activeBg') || '#f1f5f9'} darkValue={getGS('radio_activeBg_dark') || ''} onChange={(v:any) => updateGlobalStyle('radio_activeBg', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('radio_activeBg_dark', v, styleState)} />
+                          )}
                           
                           <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
                           <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Label Settings</div>
@@ -2874,6 +2877,9 @@ export default function FormBuilder() {
                           <div style={{ marginBottom: '20px' }}><Select label="Checkmark style" options={[{label:'Default',value:'default'},{label:'Bold',value:'bold'},{label:'Thin',value:'thin'}]} value={getGS('checkbox_checkStyle') || 'default'} onChange={(v) => updateGlobalStyle('checkbox_checkStyle', v, styleState)} /></div>
                           <ColorControl label="Focus ring color" value={getGS('checkbox_focusRing') || 'rgba(99,102,241,0.2)'} darkValue={getGS('checkbox_focusRing_dark') || ''} onChange={(v:any) => updateGlobalStyle('checkbox_focusRing', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('checkbox_focusRing_dark', v, styleState)} />
                           <ColorControl label="Row hover background" value={getGS('checkbox_hoverBg') || 'transparent'} darkValue={getGS('checkbox_hoverBg_dark') || ''} onChange={(v:any) => updateGlobalStyle('checkbox_hoverBg', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('checkbox_hoverBg_dark', v, styleState)} />
+                          {styleState === 'active' && (
+                            <ColorControl label="Active/Pressed background" value={getGS('checkbox_activeBg') || '#f1f5f9'} darkValue={getGS('checkbox_activeBg_dark') || ''} onChange={(v:any) => updateGlobalStyle('checkbox_activeBg', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('checkbox_activeBg_dark', v, styleState)} />
+                          )}
                           
                           <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
                           <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Label Settings</div>
@@ -2956,6 +2962,9 @@ export default function FormBuilder() {
                           <ColorControl label="Unselected color" value={getGS('rating_unselected') || '#cbd5e1'} darkValue={getGS('rating_unselected_dark') || ''} onChange={(v:any) => updateGlobalStyle('rating_unselected', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('rating_unselected_dark', v, styleState)} />
                           <ColorControl label="Selected color" value={getGS('rating_selected') || '#eab308'} darkValue={getGS('rating_selected_dark') || ''} onChange={(v:any) => updateGlobalStyle('rating_selected', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('rating_selected_dark', v, styleState)} />
                           <ColorControl label="Hover color" value={getGS('rating_hover') || '#facc15'} darkValue={getGS('rating_hover_dark') || ''} onChange={(v:any) => updateGlobalStyle('rating_hover', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('rating_hover_dark', v, styleState)} />
+                          {styleState === 'active' && (
+                            <ColorControl label="Active/Pressed color" value={getGS('rating_active') || '#ca8a04'} darkValue={getGS('rating_active_dark') || ''} onChange={(v:any) => updateGlobalStyle('rating_active', v, styleState)} onDarkChange={(v:any) => updateGlobalStyle('rating_active_dark', v, styleState)} />
+                          )}
                           
                           <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
                           <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Animation</div>

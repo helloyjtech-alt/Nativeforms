@@ -84,37 +84,62 @@
       var cssKey = k.replace(/_/g, '-').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
       container.style.setProperty('--nf-' + cssKey, String(gs[k]));
     });
+    
+    // Set placeholder animation attribute on container so CSS can target it
+    var phAnim = gs['placeholder_animation'] || 'none';
+    container.setAttribute('data-ph-anim', phAnim);
   }
 
   /* ─── FIELD RENDERERS ────────────────────────────────────────────────────── */
   function renderInput(f) {
     var typeMap = { email: 'email', number: 'number', url: 'url', phone: 'tel', date: 'date', time: 'time', datetime: 'datetime-local', password: 'password', hidden: 'hidden' };
     var inp = el('input', 'nf-control', { id: 'nf-input-' + f.id, name: f.id, type: typeMap[f.type] || 'text' });
-    if (f.placeholder) inp.placeholder = f.placeholder;
     if (f.required) inp.required = true;
     if (f.min !== undefined) inp.setAttribute('min', f.min);
     if (f.max !== undefined) inp.setAttribute('max', f.max);
     if (f.minLength) inp.minLength = f.minLength;
     if (f.maxLength) inp.maxLength = f.maxLength;
+    
+    var wrap = el('div', 'nf-input-wrap');
+    css(wrap, { position: 'relative', display: 'block', width: '100%' });
+    
     if (f.type === 'email' || f.type === 'phone') {
-      var wrap = el('div', 'nf-input-wrap');
-      css(wrap, { position: 'relative', display: 'block', width: '100%' });
-      var icon = el('span');
+      var icon = el('span', 'nf-input-icon');
       icon.innerHTML = f.type === 'email' ? ICO.email : ICO.phone;
-      css(icon, { position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', opacity: '0.4', pointerEvents: 'none', display: 'flex', alignItems: 'center' });
+      css(icon, { position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', opacity: '0.4', pointerEvents: 'none', display: 'flex', alignItems: 'center', zIndex: '2' });
       inp.style.paddingLeft = '38px';
-      wrap.appendChild(icon); wrap.appendChild(inp);
-      return wrap;
+      wrap.appendChild(icon);
     }
-    return inp;
+    
+    wrap.appendChild(inp);
+    
+    if (f.placeholder) {
+      inp.placeholder = ' '; // Required for :placeholder-shown to work
+      var ph = el('span', 'nf-placeholder');
+      ph.textContent = f.placeholder;
+      wrap.appendChild(ph);
+    }
+    
+    return wrap;
   }
 
   function renderTextarea(f) {
     var ta = el('textarea', 'nf-control', { id: 'nf-input-' + f.id, name: f.id });
     ta.rows = f.rows || 4;
-    if (f.placeholder) ta.placeholder = f.placeholder;
     if (f.required) ta.required = true;
-    return ta;
+    
+    var wrap = el('div', 'nf-input-wrap');
+    css(wrap, { position: 'relative', display: 'block', width: '100%' });
+    wrap.appendChild(ta);
+    
+    if (f.placeholder) {
+      ta.placeholder = ' '; // Required for :placeholder-shown
+      var ph = el('span', 'nf-placeholder');
+      ph.textContent = f.placeholder;
+      wrap.appendChild(ph);
+    }
+    
+    return wrap;
   }
 
   function renderDropdown(f) {
@@ -469,6 +494,31 @@
 
     var width = (f.styles && f.styles.width) ? String(f.styles.width) : (f.width ? String(f.width) : '100');
     var fieldWrap = el('div', 'nf-field', { 'data-width': width, id: 'nf-field-' + f.id });
+    
+    // Field-level styling overrides
+    if (f.customStyleEnabled && f.styles) {
+      var toKebab = function(k) { return k.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/_/g, '-').toLowerCase(); };
+      
+      // We merge states, but for variables we generally just inject the active overrides.
+      // E.g., f.styles.default has the default overrides.
+      // A better way is to iterate over the states. Wait, hover/focus are handled via different CSS variables 
+      // (like --nf-input-hover-bg), so all variables just get injected into the field wrap!
+      var mergedStyles = Object.assign({}, f.styles['default'] || {}, f.styles['hover'] || {}, f.styles['focus'] || {}, f.styles['error'] || {}, f.styles['disabled'] || {}, f.styles['active'] || {});
+      
+      Object.keys(mergedStyles).forEach(function(k) {
+         if (mergedStyles[k] !== undefined && mergedStyles[k] !== null && mergedStyles[k] !== '') {
+           fieldWrap.style.setProperty('--nf-' + toKebab(k), String(mergedStyles[k]));
+         }
+      });
+    }
+    if (f.customClass) {
+      fieldWrap.className += ' ' + f.customClass;
+    }
+    if (f.customCss) {
+      var styleEl = el('style');
+      styleEl.innerHTML = f.customCss.replace(/selector/g, '#nf-field-' + f.id);
+      fieldWrap.appendChild(styleEl);
+    }
 
     // Label
     if (f.type !== 'legal' && f.type !== 'toggle' && f.type !== 'switch') {
