@@ -34,45 +34,25 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
     const rawGS = form.globalStyles ? JSON.parse(form.globalStyles) : {};
 
-    // Map builder globalStyles keys → Liquid --nf-* CSS variable names
-    const GSKeyMap: Record<string, string> = {
-      fontFamily:        'font-body',
-      fontSize:          'input-font-size',
-      bg:                'bg',
-      input_bg:          'input-bg',
-      input_border:      'input-border',
-      radius:            'input-radius',
-      padding:           'input-padding',
-      gap:               'row-gap',
-      labelSize:         'label-size',
-      labelColor:        'label-color',
-      labelWeight:       'label-weight',
-      textColor:         'text',
-      helpColor:         'help-color',
-      helpSize:          'help-size',
-      borderColor:       'input-border',
-      borderWidth:       'border-width',
-      borderRadius:      'input-radius',
-      boxShadow:         'shadow',
-      accentColor:       'choice-checked-bg',
-      btnBg:             'btn-bg',
-      btnText:           'btn-text',
-      btnRadius:         'btn-radius',
-      btnWidth:          'btn-width',
-      maxWidth:          'max-width',
-      titleColor:        'title-color',
-      titleSize:         'title-size',
-      titleWeight:       'title-weight',
-    };
+    // Convert all globalStyles keys to CSS variable names (kebab-case)
+    // e.g. select_bg → select-bg, checkbox_uncheckedBorder → checkbox-unchecked-border
+    // step_fillColor → step-fill-color
+    // Also keep _dark and _mobile suffixes intact as their own segments
+    const toKebab = (k: string): string =>
+      k
+        .replace(/([a-z])([A-Z])/g, '$1-$2') // camelCase → camel-case
+        .replace(/_/g, '-')                   // underscores → hyphens
+        .toLowerCase();
 
     const globalStyles: Record<string, string> = {};
     for (const [k, v] of Object.entries(rawGS)) {
-      // step_* keys must pass through unchanged so the runtime can read gs.step_fillColor etc.
-      if (k.startsWith('step_')) {
+      if (v === null || v === undefined || v === '') continue;
+      // CSS var name (used by nativeforms.liquid)
+      const varName = toKebab(k);
+      globalStyles[varName] = String(v);
+      // Also keep the raw camelCase key for runtime JS (step_fillColor etc.)
+      if (!globalStyles[k]) {
         globalStyles[k] = String(v);
-      } else {
-        const varName = GSKeyMap[k] || k.replace(/([A-Z])/g, '-$1').toLowerCase();
-        globalStyles[varName] = String(v);
       }
     }
 

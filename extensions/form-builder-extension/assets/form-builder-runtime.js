@@ -79,6 +79,7 @@
     });
     if (!gs) return;
     Object.keys(gs).forEach(function (k) {
+      if (gs[k] === '' || gs[k] === null || gs[k] === undefined) return;
       // Convert snake_case and camelCase to kebab-case for CSS vars
       var cssKey = k.replace(/_/g, '-').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
       container.style.setProperty('--nf-' + cssKey, String(gs[k]));
@@ -225,6 +226,7 @@
       var choiceGap = fsStyles.choice_gap || '8px';
 
       css(group, { display: 'flex', flexDirection: f.inline ? 'row' : 'column', flexWrap: 'wrap', gap: f.inline ? '20px' : choiceGap });
+      group.setAttribute('data-type', isRadio ? 'radio' : 'checkbox');
       opts.forEach(function (o) {
         var lbl = el('label', 'nf-choice');
         css(lbl, { display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' });
@@ -294,7 +296,7 @@
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('class', 'nf-rating-star');
         svg.setAttribute('data-value', String(val));
-        css(svg, { width: '28px', height: '28px', cursor: 'pointer', fill: 'none', stroke: 'var(--nf-choice-border)', strokeWidth: '1.5', transition: 'all 0.15s' });
+        css(svg, { width: 'var(--nf-rating-size, 24px)', height: 'var(--nf-rating-size, 24px)', cursor: 'pointer', fill: 'none', stroke: 'var(--nf-rating-unselected, #cbd5e1)', strokeWidth: '1.5', transition: 'all var(--nf-rating-transition, 0.2s)' });
         svg.innerHTML = ICO.star;
         svg.addEventListener('click', function () {
           wrap.setAttribute('data-field-value', String(val));
@@ -834,7 +836,7 @@
         var submitBtn = el('button', 'nf-submit', { type: 'submit' });
         var submitLbl = el('span'); submitLbl.textContent = data.submitLabel || 'Submit';
         submitBtn.appendChild(submitLbl);
-        css(submitBtn, { padding: '12px 40px', border: 'none', background: fillColor, color: '#fff', borderRadius: 'var(--nf-btn-radius)', cursor: 'pointer', fontWeight: '700', fontSize: 'var(--nf-btn-font-size)', boxShadow: '0 4px 14px ' + fillColor + '44' });
+        css(submitBtn, { border: 'var(--nf-submit-border, none)', background: 'var(--nf-submit-bg, ' + fillColor + ')', color: 'var(--nf-submit-color, #fff)', borderRadius: 'var(--nf-submit-radius, var(--nf-btn-radius))', cursor: 'pointer', fontWeight: 'var(--nf-submit-font-weight, 700)', fontSize: 'var(--nf-submit-font-size, var(--nf-btn-font-size))' });
         navRow.appendChild(submitBtn);
 
         stepEl.addEventListener('submit', function (ev) {
@@ -855,7 +857,22 @@
             .then(function () {
               var successEl = el('div', 'nf-form');
               var msg = el('div', 'nf-success');
-              msg.innerHTML = ICO.success + '<span>' + esc(data.successMessage || 'Thank you! Your submission was received.') + '</span>';
+              var gs = data.globalStyles || {};
+              var animation = gs['success-animation'] || 'fade';
+              if (animation !== 'none') msg.setAttribute('data-animation', animation);
+              var titleSpan = el('span', 'nf-success-title');
+              titleSpan.textContent = data.successTitle || '';
+              var bodyP = el('p', 'nf-success-body');
+              bodyP.textContent = data.successMessage || 'Thank you! Your submission was received.';
+              if (gs['success-show-icon'] !== 'false') {
+                var iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                iconSvg.setAttribute('class', 'nf-success-icon');
+                iconSvg.setAttribute('viewBox', '0 0 24 24');
+                iconSvg.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>';
+                msg.appendChild(iconSvg);
+              }
+              if (titleSpan.textContent) msg.appendChild(titleSpan);
+              msg.appendChild(bodyP);
               successEl.appendChild(msg);
               canvas.innerHTML = '';
               canvas.appendChild(successEl);
@@ -984,8 +1001,21 @@
       fetch('/apps/forms/' + formId, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ submission: body }) })
         .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw d; return d; }); })
         .then(function () {
+          var gs2 = data.globalStyles || {};
+          var animation2 = gs2['success-animation'] || 'fade';
           var successEl2 = el('div', 'nf-form');
-          successEl2.innerHTML = '<div class="nf-success">' + ICO.success + '<span>' + esc(data.successMessage || 'Thank you! Your submission was received.') + '</span></div>';
+          var msg2 = el('div', 'nf-success');
+          if (animation2 !== 'none') msg2.setAttribute('data-animation', animation2);
+          if (gs2['success-show-icon'] !== 'false') {
+            var iconSvg2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconSvg2.setAttribute('class', 'nf-success-icon');
+            iconSvg2.setAttribute('viewBox', '0 0 24 24');
+            iconSvg2.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>';
+            msg2.appendChild(iconSvg2);
+          }
+          if (data.successTitle) { var t2 = el('span', 'nf-success-title'); t2.textContent = data.successTitle; msg2.appendChild(t2); }
+          var b2 = el('p', 'nf-success-body'); b2.textContent = data.successMessage || 'Thank you! Your submission was received.'; msg2.appendChild(b2);
+          successEl2.appendChild(msg2);
           canvas.innerHTML = ''; canvas.appendChild(successEl2);
         })
         .catch(function (err) {

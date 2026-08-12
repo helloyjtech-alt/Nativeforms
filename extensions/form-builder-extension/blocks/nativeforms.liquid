@@ -251,17 +251,41 @@
     gap: 8px;
     cursor: pointer;
     user-select: none;
+    width: 100%;
+    background: var(--nf-select-bg, var(--nf-input-bg));
+    color: var(--nf-select-color, var(--nf-input-color));
+    border-style: solid;
+    border-color: var(--nf-select-border, var(--nf-input-border));
+    border-width: var(--nf-select-border-width, var(--nf-input-border-width, 1px));
+    border-radius: var(--nf-select-radius, var(--nf-input-radius));
+    padding: var(--nf-select-padding, var(--nf-input-padding));
+    box-shadow: var(--nf-select-shadow, var(--nf-input-shadow, none));
+    font-size: var(--nf-input-font-size);
+    font-family: var(--nf-input-font-family, inherit);
+    font-weight: var(--nf-input-font-weight);
+    transition: border-color var(--nf-transition-duration, 0.2s) ease,
+                background-color var(--nf-transition-duration, 0.2s) ease,
+                box-shadow var(--nf-transition-duration, 0.2s) ease;
+    outline: none;
   }
-  #nf-block-{{ block.id }} .nf-select-trigger:hover:not([aria-disabled="true"]) { border-color: var(--nf-input-hover-border); }
-  #nf-block-{{ block.id }} .nf-select-value { color: var(--nf-input-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #nf-block-{{ block.id }} .nf-select-value[data-placeholder="true"] { color: var(--nf-input-placeholder); }
+  #nf-block-{{ block.id }} .nf-select-trigger:hover:not([aria-disabled="true"]) {
+    border-color: var(--nf-select-hover-border, var(--nf-input-hover-border));
+    background: var(--nf-select-hover-bg, var(--nf-input-hover-bg, var(--nf-input-bg)));
+  }
+  #nf-block-{{ block.id }} .nf-select-trigger:focus,
+  #nf-block-{{ block.id }} .nf-select[data-open="true"] .nf-select-trigger {
+    border-color: var(--nf-input-focus-border);
+    box-shadow: 0 0 0 var(--nf-input-focus-ring-width, 3px) var(--nf-select-focus-ring, var(--nf-input-focus-ring-color, rgba(99,102,241,0.18)));
+  }
+  #nf-block-{{ block.id }} .nf-select-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #nf-block-{{ block.id }} .nf-select-value[data-placeholder="true"] { color: var(--nf-placeholder-color); }
   #nf-block-{{ block.id }} .nf-select-arrow {
     flex: none;
     width: 10px; height: 10px;
-    border-right: 1.5px solid var(--nf-text-secondary);
-    border-bottom: 1.5px solid var(--nf-text-secondary);
+    border-right: 1.5px solid var(--nf-select-icon-color, var(--nf-text-secondary, #64748b));
+    border-bottom: 1.5px solid var(--nf-select-icon-color, var(--nf-text-secondary, #64748b));
     transform: rotate(45deg);
-    transition: transform var(--nf-transition-duration) ease;
+    transition: transform var(--nf-transition-duration, 0.2s) ease;
     margin-top: -3px;
   }
   #nf-block-{{ block.id }} .nf-select[data-open="true"] .nf-select-arrow { transform: rotate(-135deg); margin-top: 3px; }
@@ -269,18 +293,18 @@
     position: absolute;
     top: calc(100% + 6px);
     left: 0; right: 0;
-    background: var(--nf-dropdown-panel-bg, #ffffff);
-    border: 1px solid var(--nf-input-border);
-    border-radius: var(--nf-dropdown-radius, 8px);
-    box-shadow: var(--nf-dropdown-shadow, 0 10px 15px -3px rgba(0,0,0,0.1));
-    max-height: 240px;
+    background: var(--nf-select-panel-bg, #ffffff);
+    border: var(--nf-select-panel-border, 1px solid #e2e8f0);
+    border-radius: var(--nf-select-panel-radius, 8px);
+    box-shadow: var(--nf-select-panel-shadow, 0 10px 15px -3px rgba(0,0,0,0.1));
+    max-height: var(--nf-select-panel-max-height, 240px);
     overflow-y: auto;
     padding: 6px;
     z-index: 40;
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
     pointer-events: none;
-    transition: opacity var(--nf-transition-duration) ease, transform var(--nf-transition-duration) ease;
+    transition: opacity var(--nf-transition-duration, 0.2s) ease, transform var(--nf-transition-duration, 0.2s) ease;
   }
   #nf-block-{{ block.id }} .nf-select[data-open="true"] .nf-select-panel {
     opacity: 1;
@@ -290,37 +314,58 @@
   #nf-block-{{ block.id }} .nf-option {
     padding: 9px 10px;
     border-radius: 6px;
-    font-size: var(--nf-input-font-size);
-    color: var(--nf-dropdown-text-color, var(--nf-input-color));
+    font-size: var(--nf-select-option-size, var(--nf-input-font-size));
+    color: var(--nf-select-option-color, var(--nf-input-color, #1e293b));
     cursor: pointer;
     transition: background-color 0.12s ease;
   }
   #nf-block-{{ block.id }} .nf-option:hover,
-  #nf-block-{{ block.id }} .nf-option[data-active="true"] { background: var(--nf-dropdown-hover-bg, #f1f5f9); }
+  #nf-block-{{ block.id }} .nf-option[data-active="true"] {
+    background: var(--nf-select-option-hover-bg, #f1f5f9);
+    color: var(--nf-select-option-hover-color, var(--nf-input-color, #1e293b));
+  }
   #nf-block-{{ block.id }} .nf-option[data-selected="true"] {
-    background: var(--nf-select-option-selected-bg);
-    color: var(--nf-select-option-selected-text);
+    background: var(--nf-select-option-selected-bg, #e0e7ff);
+    color: var(--nf-select-option-selected-color, #4f46e5);
     font-weight: 600;
   }
 
   /* ----- Radio / Checkbox groups ----- */
   #nf-block-{{ block.id }} .nf-choice-group {
     display: flex;
-    flex-direction: var(--nf-choice-flex-direction, column);
-    gap: var(--nf-choice-row-gap);
+    flex-direction: var(--nf-radio-direction, column);
+    gap: var(--nf-radio-gap, 12px);
   }
-  #nf-block-{{ block.id }} .nf-choice-group[data-direction="row"] { flex-direction: row; flex-wrap: wrap; column-gap: 20px; }
+  #nf-block-{{ block.id }} .nf-choice-group[data-type="checkbox"] {
+    flex-direction: var(--nf-checkbox-direction, column);
+    gap: var(--nf-checkbox-gap, 12px);
+  }
+  #nf-block-{{ block.id }} .nf-choice-group[data-direction="row"] { flex-direction: row; flex-wrap: wrap; }
   #nf-block-{{ block.id }} .nf-choice {
     display: flex;
     align-items: flex-start;
-    gap: var(--nf-choice-gap);
+    gap: var(--nf-radio-label-gap, 8px);
     cursor: pointer;
-    font-size: var(--nf-input-font-size);
-    color: var(--nf-text);
+    font-size: var(--nf-radio-label-size, var(--nf-input-font-size));
+    font-weight: var(--nf-radio-label-weight, 400);
+    color: var(--nf-radio-label-color, var(--nf-text-color, inherit));
     padding: 8px;
     border: 1px solid transparent;
     border-radius: 6px;
-    transition: all 0.2s ease;
+    transition: background-color var(--nf-radio-transition, 0.2s) ease;
+  }
+  #nf-block-{{ block.id }} .nf-choice-group[data-type="checkbox"] .nf-choice {
+    gap: var(--nf-checkbox-label-gap, 8px);
+    font-size: var(--nf-checkbox-label-size, var(--nf-input-font-size));
+    font-weight: var(--nf-checkbox-label-weight, 400);
+    color: var(--nf-checkbox-label-color, var(--nf-text-color, inherit));
+    transition: background-color var(--nf-checkbox-transition, 0.2s) ease;
+  }
+  #nf-block-{{ block.id }} .nf-choice:hover {
+    background: var(--nf-radio-hover-bg, transparent);
+  }
+  #nf-block-{{ block.id }} .nf-choice-group[data-type="checkbox"] .nf-choice:hover {
+    background: var(--nf-checkbox-hover-bg, transparent);
   }
   #nf-block-{{ block.id }} .nf-choice:has(input:checked) {
     background: var(--nf-choice-active-bg, transparent);
@@ -329,77 +374,133 @@
   #nf-block-{{ block.id }} .nf-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   #nf-block-{{ block.id }} .nf-choice-box {
     flex: none;
-    width: var(--nf-choice-size);
-    height: var(--nf-choice-size);
-    border: 1.5px solid var(--nf-choice-border);
-    background: var(--nf-choice-unchecked-bg, var(--nf-choice-bg));
+    width: var(--nf-radio-size, 18px);
+    height: var(--nf-radio-size, 18px);
+    border: 1.5px solid var(--nf-radio-unchecked-border, #cbd5e1);
+    background: var(--nf-radio-unchecked-bg, #ffffff);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--nf-transition-duration) ease;
+    transition: all var(--nf-radio-transition, 0.2s) ease;
     margin-top: 1px;
   }
-  #nf-block-{{ block.id }} .nf-choice-box.nf-radio-box { border-radius: 50%; }
-  #nf-block-{{ block.id }} .nf-choice-box.nf-check-box { border-radius: var(--nf-choice-radius, 5px); }
-  #nf-block-{{ block.id }} .nf-choice input:focus-visible ~ .nf-choice-box {
-    box-shadow: 0 0 0 var(--nf-input-focus-ring-width, 3px) var(--nf-input-focus-ring-color);
+  #nf-block-{{ block.id }} .nf-choice-box.nf-check-box {
+    width: var(--nf-checkbox-size, 18px);
+    height: var(--nf-checkbox-size, 18px);
+    border-color: var(--nf-checkbox-unchecked-border, #cbd5e1);
+    background: var(--nf-checkbox-unchecked-bg, #ffffff);
+    border-radius: var(--nf-checkbox-radius, 4px);
+    transition: all var(--nf-checkbox-transition, 0.2s) ease;
   }
-  #nf-block-{{ block.id }} .nf-choice:hover .nf-choice-box { border-color: var(--nf-input-focus-border); }
-  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-choice-box {
-    background: var(--nf-choice-checked-bg);
-    border-color: var(--nf-choice-checked-bg);
+  #nf-block-{{ block.id }} .nf-choice-box.nf-radio-box { border-radius: 50%; }
+  #nf-block-{{ block.id }} .nf-choice input:focus-visible ~ .nf-choice-box {
+    box-shadow: 0 0 0 var(--nf-input-focus-ring-width, 3px) var(--nf-radio-focus-ring, rgba(99,102,241,0.2));
+  }
+  #nf-block-{{ block.id }} .nf-choice-group[data-type="checkbox"] .nf-choice input:focus-visible ~ .nf-choice-box {
+    box-shadow: 0 0 0 var(--nf-input-focus-ring-width, 3px) var(--nf-checkbox-focus-ring, rgba(99,102,241,0.2));
+  }
+  #nf-block-{{ block.id }} .nf-choice:hover .nf-radio-box { border-color: var(--nf-radio-checked-border, #6366f1); }
+  #nf-block-{{ block.id }} .nf-choice:hover .nf-check-box { border-color: var(--nf-checkbox-checked-border, #6366f1); }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-radio-box {
+    background: var(--nf-radio-checked-bg, #6366f1);
+    border-color: var(--nf-radio-checked-border, #6366f1);
+    transform: scale(1.04);
+  }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-check-box {
+    background: var(--nf-checkbox-checked-bg, #6366f1);
+    border-color: var(--nf-checkbox-checked-border, #6366f1);
     transform: scale(1.04);
   }
   #nf-block-{{ block.id }} .nf-choice-box svg { width: 60%; height: 60%; opacity: 0; transform: scale(0.5); transition: all 0.15s ease; }
   #nf-block-{{ block.id }} .nf-choice-box.nf-radio-box::after {
-    content: ''; width: 42%; height: 42%; border-radius: 50%; background: var(--nf-choice-tick-color, var(--nf-choice-checkmark));
+    content: ''; width: 42%; height: 42%; border-radius: 50%;
+    background: var(--nf-radio-dot-color, #ffffff);
     opacity: 0; transform: scale(0.4); transition: all 0.15s ease;
   }
   #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-radio-box::after { opacity: 1; transform: scale(1); }
-  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-check-box svg { opacity: 1; transform: scale(1); stroke: var(--nf-choice-tick-color, var(--nf-choice-checkmark)); }
-  #nf-block-{{ block.id }} .nf-choice-label { line-height: var(--nf-choice-size); }
+  #nf-block-{{ block.id }} .nf-choice input:checked ~ .nf-check-box svg {
+    opacity: 1; transform: scale(1);
+    stroke: var(--nf-checkbox-check-color, #ffffff);
+  }
+  #nf-block-{{ block.id }} .nf-choice-label { line-height: var(--nf-radio-size, 18px); }
+  #nf-block-{{ block.id }} .nf-choice-group[data-type="checkbox"] .nf-choice-label { line-height: var(--nf-checkbox-size, 18px); }
 
   /* ----- Rating ----- */
-  #nf-block-{{ block.id }} .nf-rating { display: flex; gap: 6px; }
-  #nf-block-{{ block.id }} .nf-rating-star {
-    width: 26px; height: 26px; cursor: pointer;
-    fill: none; stroke: var(--nf-input-border); stroke-width: 1.5px;
-    transition: transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease;
+  #nf-block-{{ block.id }} .nf-rating {
+    display: flex;
+    gap: var(--nf-rating-gap, 4px);
   }
-  #nf-block-{{ block.id }} .nf-rating-star:hover,
+  #nf-block-{{ block.id }} .nf-rating-star {
+    width: var(--nf-rating-size, 24px);
+    height: var(--nf-rating-size, 24px);
+    cursor: pointer;
+    fill: none;
+    stroke: var(--nf-rating-unselected, #cbd5e1);
+    stroke-width: 1.5px;
+    transition: transform var(--nf-rating-transition, 0.2s) ease,
+                fill var(--nf-rating-transition, 0.2s) ease,
+                stroke var(--nf-rating-transition, 0.2s) ease;
+  }
+  #nf-block-{{ block.id }} .nf-rating-star:hover {
+    fill: var(--nf-rating-hover, #facc15);
+    stroke: var(--nf-rating-hover, #facc15);
+    transform: scale(1.12);
+  }
   #nf-block-{{ block.id }} .nf-rating-star.nf-active {
-    fill: var(--nf-choice-checked-bg); stroke: var(--nf-choice-checked-bg); transform: scale(1.12);
+    fill: var(--nf-rating-selected, #eab308);
+    stroke: var(--nf-rating-selected, #eab308);
+    transform: scale(1.08);
   }
 
   /* ----- File upload ----- */
   #nf-block-{{ block.id }} .nf-dropzone {
-    border-width: 1.5px;
-    border-style: var(--nf-upload-border-style, dashed);
-    border-color: var(--nf-upload-border-color, var(--nf-input-border));
-    border-radius: var(--nf-input-radius);
-    background: var(--nf-upload-bg, var(--nf-input-bg));
+    border: var(--nf-file-border, 2px dashed #cbd5e1);
+    border-radius: var(--nf-file-radius, 8px);
+    background: var(--nf-file-bg, #f8fafc);
+    height: var(--nf-file-height, auto);
+    min-height: 100px;
     padding: 28px 16px;
     text-align: center;
     cursor: pointer;
-    transition: all var(--nf-transition-duration) ease;
+    transition: all var(--nf-transition-duration, 0.2s) ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
-  #nf-block-{{ block.id }} .nf-dropzone:hover,
+  #nf-block-{{ block.id }} .nf-dropzone:hover {
+    border-color: var(--nf-file-active-border, #38bdf8);
+    background: var(--nf-file-active-bg, #f0f9ff);
+  }
   #nf-block-{{ block.id }} .nf-dropzone[data-dragover="true"] {
-    border-color: var(--nf-input-focus-border);
-    background: var(--nf-upload-drag-bg, var(--nf-select-option-hover-bg));
+    border-color: var(--nf-file-active-border, #38bdf8);
+    background: var(--nf-file-active-bg, #f0f9ff);
   }
-  #nf-block-{{ block.id }} .nf-dropzone svg { width: var(--nf-upload-icon-size, 28px); height: var(--nf-upload-icon-size, 28px); stroke: var(--nf-upload-icon-color, var(--nf-text-secondary)); margin-bottom: 8px; }
-  #nf-block-{{ block.id }} .nf-dropzone-text { font-size: 13px; color: var(--nf-text-secondary); }
-  #nf-block-{{ block.id }} .nf-dropzone-text strong { color: var(--nf-input-focus-border); font-weight: 600; }
+  #nf-block-{{ block.id }} .nf-dropzone svg {
+    width: var(--nf-file-icon-size, 24px);
+    height: var(--nf-file-icon-size, 24px);
+    stroke: var(--nf-file-icon-color, #94a3b8);
+    margin-bottom: 4px;
+  }
+  #nf-block-{{ block.id }} .nf-dropzone-text {
+    font-size: 13px;
+    color: var(--nf-file-text-color, #64748b);
+  }
+  #nf-block-{{ block.id }} .nf-dropzone-text strong { color: var(--nf-input-focus-border, #6366f1); font-weight: 600; }
   #nf-block-{{ block.id }} .nf-file-chip {
     display: inline-flex; align-items: center; gap: 8px;
-    background: var(--nf-select-option-hover-bg);
-    border-radius: 999px; padding: 6px 10px 6px 12px;
+    background: var(--nf-file-chip-bg, #f1f5f9);
+    color: var(--nf-file-chip-color, #334155);
+    border-radius: var(--nf-file-chip-radius, 4px);
+    padding: 6px 10px 6px 12px;
     font-size: 13px; margin-top: 10px;
   }
   #nf-block-{{ block.id }} .nf-file-chip button {
-    background: none; border: none; cursor: pointer; color: var(--nf-text-secondary);
-    width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--nf-file-remove-color, #ef4444);
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
   }
   #nf-block-{{ block.id }} .nf-file-chip button:hover { background: rgba(0,0,0,0.08); }
 
@@ -410,34 +511,42 @@
   #nf-block-{{ block.id }} .nf-actions[data-align="right"] { justify-content: flex-end; }
   #nf-block-{{ block.id }} .nf-actions[data-align="stretch"] { justify-content: stretch; }
   #nf-block-{{ block.id }} .nf-submit {
-    width: var(--nf-btn-width, auto);
+    width: var(--nf-submit-width, var(--nf-btn-width, auto));
+    min-width: var(--nf-submit-min-width, none);
+    height: var(--nf-submit-height, auto);
     font-family: var(--nf-submit-font-family, inherit);
-    background: var(--nf-submit-bg, var(--nf-btn-bg));
-    color: var(--nf-submit-color, var(--nf-btn-text));
-    border: 1px solid var(--nf-submit-border, transparent);
-    border-radius: var(--nf-submit-radius, var(--nf-btn-radius));
-    padding: var(--nf-submit-padding, var(--nf-btn-padding));
     font-size: var(--nf-submit-font-size, var(--nf-btn-font-size));
-    font-weight: var(--nf-submit-font-weight, var(--nf-btn-weight));
+    font-weight: var(--nf-submit-font-weight, var(--nf-btn-weight, 600));
+    letter-spacing: var(--nf-submit-letter-spacing, 0px);
+    text-transform: var(--nf-submit-text-transform, none);
+    color: var(--nf-submit-color, var(--nf-btn-text, #ffffff));
+    background: var(--nf-submit-bg, var(--nf-btn-bg, #000000));
+    border: var(--nf-submit-border, none);
+    border-radius: var(--nf-submit-radius, var(--nf-btn-radius, 8px));
+    padding: var(--nf-submit-padding, var(--nf-btn-padding, 13px 32px));
     box-shadow: var(--nf-submit-shadow, var(--nf-btn-shadow));
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: background-color var(--nf-transition-duration) ease,
-                color var(--nf-transition-duration) ease,
-                box-shadow var(--nf-transition-duration) ease,
-                transform var(--nf-transition-duration) ease;
+    transition: background-color var(--nf-submit-transition-duration, var(--nf-transition-duration, 0.2s)) var(--nf-submit-transition-easing, ease),
+                color var(--nf-submit-transition-duration, var(--nf-transition-duration, 0.2s)) var(--nf-submit-transition-easing, ease),
+                box-shadow var(--nf-submit-transition-duration, var(--nf-transition-duration, 0.2s)) var(--nf-submit-transition-easing, ease),
+                border-color var(--nf-submit-transition-duration, var(--nf-transition-duration, 0.2s)) var(--nf-submit-transition-easing, ease),
+                transform var(--nf-submit-transition-duration, var(--nf-transition-duration, 0.2s)) var(--nf-submit-transition-easing, ease);
   }
   #nf-block-{{ block.id }} .nf-submit:hover:not(:disabled) {
     background: var(--nf-submit-hover-bg, var(--nf-btn-hover-bg));
     border-color: var(--nf-submit-hover-border, transparent);
     color: var(--nf-submit-hover-color, var(--nf-btn-hover-text));
     box-shadow: var(--nf-submit-hover-shadow, var(--nf-btn-hover-shadow));
-    transform: translateY(var(--nf-btn-hover-lift));
+    transform: var(--nf-submit-hover-transform-css, none);
   }
-  #nf-block-{{ block.id }} .nf-submit:active:not(:disabled) { transform: scale(0.98); }
+  #nf-block-{{ block.id }} .nf-submit:active:not(:disabled) {
+    background: var(--nf-submit-active-bg, var(--nf-submit-bg));
+    transform: var(--nf-submit-active-transform-css, scale(0.97));
+  }
   #nf-block-{{ block.id }} .nf-submit:disabled { 
     background: var(--nf-submit-disabled-bg, #e2e8f0);
     opacity: var(--nf-submit-disabled-opacity, 0.7); 
@@ -445,7 +554,7 @@
   }
   #nf-block-{{ block.id }} .nf-spinner {
     width: 15px; height: 15px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.4); border-top-color: currentColor;
+    border: 2px solid rgba(255,255,255,0.4); border-top-color: var(--nf-spinner-color, currentColor);
     animation: nf-spin 0.7s linear infinite;
   }
   @keyframes nf-spin { to { transform: rotate(360deg); } }
@@ -453,27 +562,60 @@
   /* ----- Success message ----- */
   #nf-block-{{ block.id }} .nf-success {
     background: var(--nf-success-bg, #f0fdf4);
-    border: 1px solid var(--nf-success-border, #bbf7d0);
+    border: var(--nf-success-border, 1px solid #bbf7d0);
     border-radius: var(--nf-success-radius, 12px);
     padding: var(--nf-success-padding, 24px 32px);
-    text-align: center;
+    box-shadow: var(--nf-success-shadow, none);
+    text-align: var(--nf-success-text-align, center);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    animation: nf-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  #nf-block-{{ block.id }} .nf-success span {
+  #nf-block-{{ block.id }} .nf-success[data-animation="fade"] { animation: nf-fade-in var(--nf-success-animation-duration, 0.4s) ease; }
+  #nf-block-{{ block.id }} .nf-success[data-animation="slide-down"] { animation: nf-slide-down var(--nf-success-animation-duration, 0.4s) ease; }
+  #nf-block-{{ block.id }} .nf-success[data-animation="scale-up"] { animation: nf-scale-in var(--nf-success-animation-duration, 0.4s) cubic-bezier(0.16, 1, 0.3, 1); }
+  #nf-block-{{ block.id }} .nf-success-icon {
+    width: var(--nf-success-icon-size, 48px);
+    height: var(--nf-success-icon-size, 48px);
+    stroke: var(--nf-success-icon-color, #16a34a);
+    fill: none;
+    stroke-width: 1.5;
+  }
+  #nf-block-{{ block.id }} .nf-success .nf-success-title {
     font-family: var(--nf-success-title-font, inherit);
     color: var(--nf-success-title-color, #166534);
     font-size: var(--nf-success-title-size, 24px);
+    font-weight: var(--nf-success-title-weight, 600);
+    margin: 0;
   }
-  #nf-block-{{ block.id }} .nf-success p {
+  #nf-block-{{ block.id }} .nf-success .nf-success-body {
+    font-family: var(--nf-success-body-font, inherit);
+    color: var(--nf-success-body-color, #15803d);
+    font-size: var(--nf-success-body-size, 16px);
+    margin: 0;
+  }
+  /* Legacy span/p in success block */
+  #nf-block-{{ block.id }} .nf-success > span {
+    font-family: var(--nf-success-title-font, inherit);
+    color: var(--nf-success-title-color, #166534);
+    font-size: var(--nf-success-title-size, 24px);
+    font-weight: var(--nf-success-title-weight, 600);
+  }
+  #nf-block-{{ block.id }} .nf-success > p {
     font-family: var(--nf-success-body-font, inherit);
     color: var(--nf-success-body-color, #15803d);
     font-size: var(--nf-success-body-size, 16px);
   }
-  #nf-block-{{ block.id }} .nf-success svg { width: 30px; height: 30px; stroke: var(--nf-success-title-color, #166534); }
+  #nf-block-{{ block.id }} .nf-success svg.nf-success-icon { width: var(--nf-success-icon-size, 48px); height: var(--nf-success-icon-size, 48px); stroke: var(--nf-success-icon-color, #16a34a); }
+  @keyframes nf-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes nf-slide-down {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   @keyframes nf-scale-in {
     from { opacity: 0; transform: scale(0.92); }
     to   { opacity: 1; transform: scale(1); }
@@ -490,9 +632,34 @@
   }
   /* ── Multi-Step: nav buttons ── */
   #nf-block-{{ block.id }} .nf-step-nav { display: flex; padding-top: 20px; margin-top: 24px; border-top: 1px solid var(--nf-input-border); }
-  #nf-block-{{ block.id }} .nf-back-btn { background: var(--nf-step-back-bg, #e2e8f0); color: var(--nf-step-back-color, #334155); }
-  #nf-block-{{ block.id }} .nf-back-btn:hover { filter: brightness(0.95); }
+  #nf-block-{{ block.id }} .nf-back-btn {
+    background: var(--nf-step-back-bg, #e2e8f0);
+    color: var(--nf-step-back-color, #334155);
+    transition: background-color var(--nf-transition-duration, 0.2s) ease;
+  }
+  #nf-block-{{ block.id }} .nf-back-btn:hover { background: var(--nf-step-back-hover-bg, var(--nf-step-back-bg, #cbd5e1)); }
   #nf-block-{{ block.id }} .nf-continue-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  /* ── Multi-Step: progress bar ── */
+  #nf-block-{{ block.id }} .nf-progress-bar-track {
+    width: 100%;
+    height: var(--nf-step-track-height, 4px);
+    background: var(--nf-step-track-color, #e2e8f0);
+    border-radius: var(--nf-step-track-radius, 4px);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  #nf-block-{{ block.id }} .nf-progress-bar-fill {
+    height: 100%;
+    background: var(--nf-step-fill-color, #7c3aed);
+    border-radius: var(--nf-step-fill-radius, 4px);
+    transition: width var(--nf-step-fill-transition, 0.3s) ease;
+  }
+  #nf-block-{{ block.id }} .nf-step-counter {
+    font-size: var(--nf-step-counter-size, 14px);
+    color: var(--nf-step-counter-color, #7c3aed);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
   /* ── Slide transition helper ── */
   #nf-block-{{ block.id }} .nativeforms-canvas-container { position: relative; }
 
@@ -501,6 +668,109 @@
 
   @media (prefers-reduced-motion: reduce) {
     #nf-block-{{ block.id }} * { animation: none !important; transition: none !important; }
+  }
+
+  /* Responsive Fallbacks */
+  @media (max-width: 768px) {
+    #nf-block-{{ block.id }} {
+      --nf-wrapper-padding: var(--nf-wrapper-padding-mobile, var(--nf-wrapper-padding)) !important;
+      --nf-wrapper-margin: var(--nf-wrapper-margin-mobile, var(--nf-wrapper-margin)) !important;
+      --nf-wrapper-width: var(--nf-wrapper-width-mobile, var(--nf-wrapper-width)) !important;
+      --nf-wrapper-min-width: var(--nf-wrapper-min-width-mobile, var(--nf-wrapper-min-width)) !important;
+      --nf-wrapper-max-width: var(--nf-wrapper-max-width-mobile, var(--nf-wrapper-max-width)) !important;
+      --nf-wrapper-height: var(--nf-wrapper-height-mobile, var(--nf-wrapper-height)) !important;
+      --nf-wrapper-min-height: var(--nf-wrapper-min-height-mobile, var(--nf-wrapper-min-height)) !important;
+      --nf-wrapper-max-height: var(--nf-wrapper-max-height-mobile, var(--nf-wrapper-max-height)) !important;
+      
+      --nf-padding: var(--nf-padding-mobile, var(--nf-padding)) !important;
+      --nf-radius: var(--nf-radius-mobile, var(--nf-radius)) !important;
+      --nf-container-border-width: var(--nf-container-border-width-mobile, var(--nf-container-border-width)) !important;
+      --nf-container-outline-width: var(--nf-container-outline-width-mobile, var(--nf-container-outline-width)) !important;
+      --nf-container-outline-offset: var(--nf-container-outline-offset-mobile, var(--nf-container-outline-offset)) !important;
+      --nf-container-width: var(--nf-container-width-mobile, var(--nf-container-width)) !important;
+      --nf-container-min-width: var(--nf-container-min-width-mobile, var(--nf-container-min-width)) !important;
+      --nf-container-max-width: var(--nf-container-max-width-mobile, var(--nf-container-max-width)) !important;
+      --nf-container-min-height: var(--nf-container-min-height-mobile, var(--nf-container-min-height)) !important;
+      --nf-container-max-height: var(--nf-container-max-height-mobile, var(--nf-container-max-height)) !important;
+
+      --nf-header-padding: var(--nf-header-padding-mobile, var(--nf-header-padding)) !important;
+      --nf-header-border-bottom-width: var(--nf-header-border-bottom-width-mobile, var(--nf-header-border-bottom-width)) !important;
+      --nf-title-size: var(--nf-title-size-mobile, var(--nf-title-size)) !important;
+      --nf-title-letter-spacing: var(--nf-title-letter-spacing-mobile, var(--nf-title-letter-spacing)) !important;
+      --nf-title-line-height: var(--nf-title-line-height-mobile, var(--nf-title-line-height)) !important;
+      --nf-title-margin-bottom: var(--nf-title-margin-bottom-mobile, var(--nf-title-margin-bottom)) !important;
+      --nf-subtitle-size: var(--nf-subtitle-size-mobile, var(--nf-subtitle-size)) !important;
+      --nf-subtitle-letter-spacing: var(--nf-subtitle-letter-spacing-mobile, var(--nf-subtitle-letter-spacing)) !important;
+      --nf-subtitle-line-height: var(--nf-subtitle-line-height-mobile, var(--nf-subtitle-line-height)) !important;
+
+      --nf-gap: var(--nf-gap-mobile, var(--nf-gap)) !important;
+      --nf-row-gap: var(--nf-row-gap-mobile, var(--nf-row-gap)) !important;
+      --nf-label-gap: var(--nf-label-gap-mobile, var(--nf-label-gap)) !important;
+
+      --nf-font-size: var(--nf-font-size-mobile, var(--nf-font-size)) !important;
+      --nf-line-height: var(--nf-line-height-mobile, var(--nf-line-height)) !important;
+      --nf-label-font-size: var(--nf-label-font-size-mobile, var(--nf-label-font-size)) !important;
+      --nf-label-letter-spacing: var(--nf-label-letter-spacing-mobile, var(--nf-label-letter-spacing)) !important;
+      --nf-help-font-size: var(--nf-help-font-size-mobile, var(--nf-help-font-size)) !important;
+
+      --nf-input-border-width: var(--nf-input-border-width-mobile, var(--nf-input-border-width)) !important;
+      --nf-input-radius: var(--nf-input-radius-mobile, var(--nf-input-radius)) !important;
+      --nf-input-padding: var(--nf-input-padding-mobile, var(--nf-input-padding)) !important;
+      --nf-input-height: var(--nf-input-height-mobile, var(--nf-input-height)) !important;
+      --nf-input-min-height: var(--nf-input-min-height-mobile, var(--nf-input-min-height)) !important;
+      --nf-input-max-height: var(--nf-input-max-height-mobile, var(--nf-input-max-height)) !important;
+      --nf-input-width: var(--nf-input-width-mobile, var(--nf-input-width)) !important;
+      --nf-input-min-width: var(--nf-input-min-width-mobile, var(--nf-input-min-width)) !important;
+      --nf-input-max-width: var(--nf-input-max-width-mobile, var(--nf-input-max-width)) !important;
+      --nf-input-font-size: var(--nf-input-font-size-mobile, var(--nf-input-font-size)) !important;
+      --nf-input-outline-width: var(--nf-input-outline-width-mobile, var(--nf-input-outline-width)) !important;
+      --nf-input-outline-offset: var(--nf-input-outline-offset-mobile, var(--nf-input-outline-offset)) !important;
+      --nf-input-focus-ring-width: var(--nf-input-focus-ring-width-mobile, var(--nf-input-focus-ring-width)) !important;
+      --nf-input-focus-ring-offset: var(--nf-input-focus-ring-offset-mobile, var(--nf-input-focus-ring-offset)) !important;
+      
+      --nf-placeholder-font-size: var(--nf-placeholder-font-size-mobile, var(--nf-placeholder-font-size)) !important;
+      --nf-placeholder-letter-spacing: var(--nf-placeholder-letter-spacing-mobile, var(--nf-placeholder-letter-spacing)) !important;
+    }
+  }
+
+  /* Dark Mode Fallbacks */
+  @media (prefers-color-scheme: dark) {
+    #nf-block-{{ block.id }} {
+      --nf-wrapper-bg: var(--nf-wrapper-bg-dark, var(--nf-wrapper-bg)) !important;
+      --nf-container-bg: var(--nf-container-bg-dark, var(--nf-container-bg)) !important;
+      --nf-container-border-color: var(--nf-container-border-color-dark, var(--nf-container-border-color)) !important;
+      --nf-container-outline-color: var(--nf-container-outline-color-dark, var(--nf-container-outline-color)) !important;
+      --nf-header-bg: var(--nf-header-bg-dark, var(--nf-header-bg)) !important;
+      --nf-header-border-bottom-color: var(--nf-header-border-bottom-color-dark, var(--nf-header-border-bottom-color)) !important;
+      --nf-title-color: var(--nf-title-color-dark, var(--nf-title-color)) !important;
+      --nf-subtitle-color: var(--nf-subtitle-color-dark, var(--nf-subtitle-color)) !important;
+      --nf-text-color: var(--nf-text-color-dark, var(--nf-text-color)) !important;
+      --nf-label-color: var(--nf-label-color-dark, var(--nf-label-color)) !important;
+      --nf-asterisk-color: var(--nf-asterisk-color-dark, var(--nf-asterisk-color)) !important;
+      --nf-help-color: var(--nf-help-color-dark, var(--nf-help-color)) !important;
+      
+      --nf-input-bg: var(--nf-input-bg-dark, var(--nf-input-bg)) !important;
+      --nf-input-border: var(--nf-input-border-dark, var(--nf-input-border)) !important;
+      --nf-input-color: var(--nf-input-color-dark, var(--nf-input-color)) !important;
+      --nf-input-outline-color: var(--nf-input-outline-color-dark, var(--nf-input-outline-color)) !important;
+      --nf-input-hover-bg: var(--nf-input-hover-bg-dark, var(--nf-input-hover-bg)) !important;
+      --nf-input-hover-border: var(--nf-input-hover-border-dark, var(--nf-input-hover-border)) !important;
+      --nf-input-hover-color: var(--nf-input-hover-color-dark, var(--nf-input-hover-color)) !important;
+      --nf-input-hover-outline-color: var(--nf-input-hover-outline-color-dark, var(--nf-input-hover-outline-color)) !important;
+      --nf-input-focus-bg: var(--nf-input-focus-bg-dark, var(--nf-input-focus-bg)) !important;
+      --nf-input-focus-border: var(--nf-input-focus-border-dark, var(--nf-input-focus-border)) !important;
+      --nf-input-focus-color: var(--nf-input-focus-color-dark, var(--nf-input-focus-color)) !important;
+      --nf-input-focus-outline-color: var(--nf-input-focus-outline-color-dark, var(--nf-input-focus-outline-color)) !important;
+      --nf-input-focus-ring-color: var(--nf-input-focus-ring-color-dark, var(--nf-input-focus-ring-color)) !important;
+      --nf-input-error-bg: var(--nf-input-error-bg-dark, var(--nf-input-error-bg)) !important;
+      --nf-input-error-border: var(--nf-input-error-border-dark, var(--nf-input-error-border)) !important;
+      --nf-input-error-color: var(--nf-input-error-color-dark, var(--nf-input-error-color)) !important;
+      --nf-input-error-outline-color: var(--nf-input-error-outline-color-dark, var(--nf-input-error-outline-color)) !important;
+      --nf-input-disabled-bg: var(--nf-input-disabled-bg-dark, var(--nf-input-disabled-bg)) !important;
+      --nf-input-disabled-border: var(--nf-input-disabled-border-dark, var(--nf-input-disabled-border)) !important;
+      --nf-input-disabled-color: var(--nf-input-disabled-color-dark, var(--nf-input-disabled-color)) !important;
+      --nf-placeholder-color: var(--nf-placeholder-color-dark, var(--nf-placeholder-color)) !important;
+    }
   }
 {% endstyle %}
 
