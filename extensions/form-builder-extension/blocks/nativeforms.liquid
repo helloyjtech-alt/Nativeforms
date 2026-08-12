@@ -410,16 +410,16 @@
   #nf-block-{{ block.id }} .nf-actions[data-align="right"] { justify-content: flex-end; }
   #nf-block-{{ block.id }} .nf-actions[data-align="stretch"] { justify-content: stretch; }
   #nf-block-{{ block.id }} .nf-submit {
-    width: var(--nf-btn-width);
-    font-family: var(--nf-font-body);
-    background: var(--nf-btn-bg);
-    color: var(--nf-btn-text);
-    border: none;
-    border-radius: var(--nf-btn-radius);
-    padding: var(--nf-btn-padding);
-    font-size: var(--nf-btn-font-size);
-    font-weight: var(--nf-btn-weight);
-    box-shadow: var(--nf-btn-shadow);
+    width: var(--nf-btn-width, auto);
+    font-family: var(--nf-submit-font-family, inherit);
+    background: var(--nf-submit-bg, var(--nf-btn-bg));
+    color: var(--nf-submit-color, var(--nf-btn-text));
+    border: 1px solid var(--nf-submit-border, transparent);
+    border-radius: var(--nf-submit-radius, var(--nf-btn-radius));
+    padding: var(--nf-submit-padding, var(--nf-btn-padding));
+    font-size: var(--nf-submit-font-size, var(--nf-btn-font-size));
+    font-weight: var(--nf-submit-font-weight, var(--nf-btn-weight));
+    box-shadow: var(--nf-submit-shadow, var(--nf-btn-shadow));
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -431,13 +431,18 @@
                 transform var(--nf-transition-duration) ease;
   }
   #nf-block-{{ block.id }} .nf-submit:hover:not(:disabled) {
-    background: var(--nf-btn-hover-bg);
-    color: var(--nf-btn-hover-text);
-    box-shadow: var(--nf-btn-hover-shadow);
+    background: var(--nf-submit-hover-bg, var(--nf-btn-hover-bg));
+    border-color: var(--nf-submit-hover-border, transparent);
+    color: var(--nf-submit-hover-color, var(--nf-btn-hover-text));
+    box-shadow: var(--nf-submit-hover-shadow, var(--nf-btn-hover-shadow));
     transform: translateY(var(--nf-btn-hover-lift));
   }
   #nf-block-{{ block.id }} .nf-submit:active:not(:disabled) { transform: scale(0.98); }
-  #nf-block-{{ block.id }} .nf-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+  #nf-block-{{ block.id }} .nf-submit:disabled { 
+    background: var(--nf-submit-disabled-bg, #e2e8f0);
+    opacity: var(--nf-submit-disabled-opacity, 0.7); 
+    cursor: not-allowed; 
+  }
   #nf-block-{{ block.id }} .nf-spinner {
     width: 15px; height: 15px; border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.4); border-top-color: currentColor;
@@ -447,11 +452,10 @@
 
   /* ----- Success message ----- */
   #nf-block-{{ block.id }} .nf-success {
-    background: var(--nf-success-bg);
-    border: 1px solid var(--nf-success-border);
-    color: var(--nf-success-text);
-    border-radius: var(--nf-success-radius);
-    padding: 18px 20px;
+    background: var(--nf-success-bg, #f0fdf4);
+    border: 1px solid var(--nf-success-border, #bbf7d0);
+    border-radius: var(--nf-success-radius, 12px);
+    padding: var(--nf-success-padding, 24px 32px);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -459,7 +463,17 @@
     gap: 8px;
     animation: nf-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  #nf-block-{{ block.id }} .nf-success svg { width: 30px; height: 30px; }
+  #nf-block-{{ block.id }} .nf-success span {
+    font-family: var(--nf-success-title-font, inherit);
+    color: var(--nf-success-title-color, #166534);
+    font-size: var(--nf-success-title-size, 24px);
+  }
+  #nf-block-{{ block.id }} .nf-success p {
+    font-family: var(--nf-success-body-font, inherit);
+    color: var(--nf-success-body-color, #15803d);
+    font-size: var(--nf-success-body-size, 16px);
+  }
+  #nf-block-{{ block.id }} .nf-success svg { width: 30px; height: 30px; stroke: var(--nf-success-title-color, #166534); }
   @keyframes nf-scale-in {
     from { opacity: 0; transform: scale(0.92); }
     to   { opacity: 1; transform: scale(1); }
@@ -475,8 +489,9 @@
     font-size: 14px; color: var(--nf-text-secondary); margin: 0 0 20px 0;
   }
   /* ── Multi-Step: nav buttons ── */
-  #nf-block-{{ block.id }} .nf-step-nav { display: flex; padding-top: 20px; margin-top: 24px; border-top: 1px solid var(--nf-border); }
-  #nf-block-{{ block.id }} .nf-back-btn:hover { background: var(--nf-input-bg) !important; }
+  #nf-block-{{ block.id }} .nf-step-nav { display: flex; padding-top: 20px; margin-top: 24px; border-top: 1px solid var(--nf-input-border); }
+  #nf-block-{{ block.id }} .nf-back-btn { background: var(--nf-step-back-bg, #e2e8f0); color: var(--nf-step-back-color, #334155); }
+  #nf-block-{{ block.id }} .nf-back-btn:hover { filter: brightness(0.95); }
   #nf-block-{{ block.id }} .nf-continue-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
   /* ── Slide transition helper ── */
   #nf-block-{{ block.id }} .nativeforms-canvas-container { position: relative; }

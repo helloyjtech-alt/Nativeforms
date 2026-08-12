@@ -2717,60 +2717,61 @@ export default function FormBuilder() {
                           <SliderControl label="Error box border radius" value={getGS('error_radius') || '0px'} onChange={(v:any) => updateGlobalStyle('error_radius', v, styleState)} min={0} max={20} />
                         </Accordion>
 
-                        <Accordion title={`9. Buttons (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Submit background" value={getGS('submit_bg') || '#000000'} onChange={(v:any) => updateGlobalStyle('submit_bg', v, styleState)} />
-                          <ColorControl label="Submit text color" value={getGS('submit_color') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('submit_color', v, styleState)} />
-                          <ColorControl label="Submit border" value={getGS('submit_border') || 'transparent'} onChange={(v:any) => updateGlobalStyle('submit_border', v, styleState)} />
-                          <SliderControl label="Submit radius" value={getGS('submit_radius') || '8px'} onChange={(v:any) => updateGlobalStyle('submit_radius', v, styleState)} min={0} max={50} />
-                          <ColorControl label="Secondary/back background" value={getGS('back_bg') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('back_bg', v, styleState)} />
-                          <ColorControl label="Secondary/back text color" value={getGS('back_color') || '#202223'} onChange={(v:any) => updateGlobalStyle('back_color', v, styleState)} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Button size" options={[{label:'Small',value:'sm'},{label:'Medium',value:'md'},{label:'Large',value:'lg'}]} value={getGS('button_size') || 'md'} onChange={(v) => updateGlobalStyle('button_size', v, styleState)} /></div>
-                        </Accordion>
-                        
-                        <Accordion title={`10. Choice Fields (Radio & Checkbox) (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Tick/Checkmark color" value={getGS('choice_tickColor') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('choice_tickColor', v, styleState)} />
-                          <ColorControl label="Unchecked background" value={getGS('choice_uncheckedBg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('choice_uncheckedBg', v, styleState)} />
-                          <ColorControl label="Checked background" value={getGS('choice_checkedBg') || '#6366f1'} onChange={(v:any) => updateGlobalStyle('choice_checkedBg', v, styleState)} />
-                          <SliderControl label="Checkbox border radius" value={getGS('choice_radius') || '4px'} onChange={(v:any) => updateGlobalStyle('choice_radius', v, styleState)} min={0} max={20} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Options Layout" options={[{label:'Column (Vertical)',value:'column'},{label:'Row (Horizontal)',value:'row'}]} value={getGS('choice_flexDirection') || 'column'} onChange={(v) => updateGlobalStyle('choice_flexDirection', v, styleState)} /></div>
+                        <Accordion title={`13. Submit Buttons (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Default background" value={getGS('submit_bg') || '#000000'} onChange={(v:any) => updateGlobalStyle('submit_bg', v, styleState)} />
+                          <ColorControl label="Default text color" value={getGS('submit_color') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('submit_color', v, styleState)} />
+                          <ColorControl label="Default border" value={getGS('submit_border') || 'transparent'} onChange={(v:any) => updateGlobalStyle('submit_border', v, styleState)} />
+                          <FourWaySpacingControl label="Padding" value={getGS('submit_padding') || '13px 32px'} onChange={(v:any) => updateGlobalStyle('submit_padding', v, styleState)} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Width" options={[{label:'Auto',value:'auto'},{label:'Full width (100%)',value:'100%'}]} value={getGS('submit_width') || 'auto'} onChange={(v) => updateGlobalStyle('submit_width', v, styleState)} /></div>
+                          <SliderControl label="Border radius" value={getGS('submit_radius') || '8px'} onChange={(v:any) => updateGlobalStyle('submit_radius', v, styleState)} min={0} max={50} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('submit_fontFamily') || 'inherit'} onChange={(v) => updateGlobalStyle('submit_fontFamily', v, styleState)} /></div>
+                          <SliderControl label="Font size" value={getGS('submit_fontSize') || '15px'} onChange={(v:any) => updateGlobalStyle('submit_fontSize', v, styleState)} min={12} max={30} />
+                          <div style={{ marginBottom: '20px' }}><Select label="Font weight" options={[{label:'Regular',value:'400'},{label:'Medium',value:'500'},{label:'Bold',value:'700'}]} value={getGS('submit_fontWeight') || '600'} onChange={(v) => updateGlobalStyle('submit_fontWeight', v, styleState)} /></div>
+                          <ShadowControl label="Box shadow" value={getGS('submit_shadow') || '0 4px 14px rgba(0,0,0,0.1)'} onChange={(v:any) => updateGlobalStyle('submit_shadow', v, styleState)} />
+                          
                           <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
-                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Choice Button/Box Styles</div>
-                          <ColorControl label="Active/Selected background" value={getGS('choice_activeBg') || 'rgba(99,102,241,0.05)'} onChange={(v:any) => updateGlobalStyle('choice_activeBg', v, styleState)} />
-                          <ColorControl label="Active/Selected border" value={getGS('choice_activeBorder') || '#6366f1'} onChange={(v:any) => updateGlobalStyle('choice_activeBorder', v, styleState)} />
-                        </Accordion>
-
-                        <Accordion title={`11. Dropdowns & Selects (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Dropdown panel background" value={getGS('dropdown_panelBg') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('dropdown_panelBg', v, styleState)} />
-                          <SliderControl label="Panel border radius" value={getGS('dropdown_radius') || '8px'} onChange={(v:any) => updateGlobalStyle('dropdown_radius', v, styleState)} min={0} max={30} />
-                          <ShadowControl label="Panel box shadow" value={getGS('dropdown_shadow') || '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)'} onChange={(v:any) => updateGlobalStyle('dropdown_shadow', v, styleState)} />
-                          <ColorControl label="Option hover background" value={getGS('dropdown_hoverBg') || '#f1f5f9'} onChange={(v:any) => updateGlobalStyle('dropdown_hoverBg', v, styleState)} />
-                          <ColorControl label="Option text color" value={getGS('dropdown_textColor') || '#1e293b'} onChange={(v:any) => updateGlobalStyle('dropdown_textColor', v, styleState)} />
-                        </Accordion>
-                        
-                        <Accordion title={`12. File Upload Fields (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Upload box background" value={getGS('upload_bg') || '#f8fafc'} onChange={(v:any) => updateGlobalStyle('upload_bg', v, styleState)} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Border style" options={[{label:'Dashed',value:'dashed'},{label:'Solid',value:'solid'},{label:'Dotted',value:'dotted'}]} value={getGS('upload_borderStyle') || 'dashed'} onChange={(v) => updateGlobalStyle('upload_borderStyle', v, styleState)} /></div>
-                          <ColorControl label="Upload box border color" value={getGS('upload_borderColor') || '#cbd5e1'} onChange={(v:any) => updateGlobalStyle('upload_borderColor', v, styleState)} />
-                          <ColorControl label="Drag-over background" value={getGS('upload_dragBg') || '#e0e7ff'} onChange={(v:any) => updateGlobalStyle('upload_dragBg', v, styleState)} />
-                          <ColorControl label="Icon/Text color" value={getGS('upload_iconColor') || '#64748b'} onChange={(v:any) => updateGlobalStyle('upload_iconColor', v, styleState)} />
-                          <SliderControl label="Icon size" value={getGS('upload_iconSize') || '24px'} onChange={(v:any) => updateGlobalStyle('upload_iconSize', v, styleState)} min={12} max={64} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Hover State</div>
+                          <ColorControl label="Hover background" value={getGS('submit_hoverBg') || '#333333'} onChange={(v:any) => updateGlobalStyle('submit_hoverBg', v, styleState)} />
+                          <ColorControl label="Hover border color" value={getGS('submit_hoverBorder') || 'transparent'} onChange={(v:any) => updateGlobalStyle('submit_hoverBorder', v, styleState)} />
+                          <ColorControl label="Hover text color" value={getGS('submit_hoverColor') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('submit_hoverColor', v, styleState)} />
+                          <ShadowControl label="Hover box shadow" value={getGS('submit_hoverShadow') || '0 4px 14px rgba(0,0,0,0.2)'} onChange={(v:any) => updateGlobalStyle('submit_hoverShadow', v, styleState)} />
+                          
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Disabled & Loading</div>
+                          <ColorControl label="Disabled background" value={getGS('submit_disabledBg') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('submit_disabledBg', v, styleState)} />
+                          <SliderControl label="Disabled opacity" value={getGS('submit_disabledOpacity') || '0.7'} onChange={(v:any) => updateGlobalStyle('submit_disabledOpacity', v, styleState)} min={0} max={1} step={0.1} />
+                          <ColorControl label="Loading spinner color" value={getGS('spinner_color') || '#ffffff'} onChange={(v:any) => updateGlobalStyle('spinner_color', v, styleState)} />
                         </Accordion>
                         
-                        <Accordion title={`13. Misc / branding (${styleState})`} defaultOpen={false}>
-                          <ColorControl label="Loading-spinner color" value={getGS('spinner_color') || '#000000'} onChange={(v:any) => updateGlobalStyle('spinner_color', v, styleState)} />
-                          <ColorControl label="Progress-bar accent color" value={getGS('progress_color') || '#000000'} onChange={(v:any) => updateGlobalStyle('progress_color', v, styleState)} />
-                        </Accordion>
-                        
-                        <Accordion title={`14. Step Navigation (${styleState})`} defaultOpen={false}>
+                        <Accordion title={`14. Multi-Step Navigation (${styleState})`} defaultOpen={false}>
                           <div style={{ padding: '8px 0 12px', marginBottom: '12px', backgroundColor: '#f0f4ff', borderRadius: '6px', padding: '10px 12px', fontSize: '12px', color: '#3b5fc0' }}>Controls the look of multi-step forms. Single-page forms are unaffected.</div>
+                          <div style={{ marginBottom: '20px' }}><Select label="Progress indicator style" options={[{label:'Dots (numbered circles)',value:'dots'},{label:'Progress bar',value:'bar'},{label:'Numbered counter (01 — 04)',value:'numbered'},{label:'None',value:'none'}]} value={getGS('step_progressStyle') || 'dots'} onChange={(v) => updateGlobalStyle('step_progressStyle', v, styleState)} /></div>
                           <ColorControl label="Progress fill color" value={getGS('step_fillColor') || '#7c3aed'} onChange={(v:any) => updateGlobalStyle('step_fillColor', v, styleState)} />
                           <ColorControl label="Progress track color" value={getGS('step_trackColor') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('step_trackColor', v, styleState)} />
                           <ColorControl label="Counter / label text color" value={getGS('step_counterColor') || '#7c3aed'} onChange={(v:any) => updateGlobalStyle('step_counterColor', v, styleState)} />
                           <SliderControl label="Counter font size" value={getGS('step_counterSize') || '20px'} onChange={(v:any) => updateGlobalStyle('step_counterSize', v, styleState)} min={12} max={40} />
-                          <div style={{ marginBottom: '20px' }}><Select label="Default progress indicator style" options={[{label:'Dots (numbered circles)',value:'dots'},{label:'Progress bar',value:'bar'},{label:'Numbered counter (01 — 04)',value:'numbered'},{label:'None',value:'none'}]} value={getGS('step_progressStyle') || 'dots'} onChange={(v) => updateGlobalStyle('step_progressStyle', v, styleState)} /></div>
                           <div style={{ marginBottom: '20px' }}><Select label="Step transition" options={[{label:'Fade',value:'fade'},{label:'Slide (left/right)',value:'slide'},{label:'None',value:'none'}]} value={getGS('step_transition') || 'fade'} onChange={(v) => updateGlobalStyle('step_transition', v, styleState)} /></div>
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Navigation Buttons</div>
                           <TextField label="Default continue button label" placeholder="Continue" value={getGS('step_continueLabel') || ''} onChange={(v) => updateGlobalStyle('step_continueLabel', v, styleState)} autoComplete="off" />
-                          <div style={{ marginTop: '12px' }}><TextField label="Default back button label" placeholder="Back" value={getGS('step_backLabel') || ''} onChange={(v) => updateGlobalStyle('step_backLabel', v, styleState)} autoComplete="off" /></div>
+                          <div style={{ marginTop: '12px', marginBottom: '12px' }}><TextField label="Default back button label" placeholder="Back" value={getGS('step_backLabel') || ''} onChange={(v) => updateGlobalStyle('step_backLabel', v, styleState)} autoComplete="off" /></div>
+                          <ColorControl label="Back button background" value={getGS('step_backBg') || '#e2e8f0'} onChange={(v:any) => updateGlobalStyle('step_backBg', v, styleState)} />
+                          <ColorControl label="Back button text color" value={getGS('step_backColor') || '#334155'} onChange={(v:any) => updateGlobalStyle('step_backColor', v, styleState)} />
+                        </Accordion>
+                        
+                        <Accordion title={`15. Success Message / Redirect (${styleState})`} defaultOpen={false}>
+                          <ColorControl label="Success box background" value={getGS('success_bg') || '#f0fdf4'} onChange={(v:any) => updateGlobalStyle('success_bg', v, styleState)} />
+                          <ColorControl label="Success box border" value={getGS('success_border') || '#bbf7d0'} onChange={(v:any) => updateGlobalStyle('success_border', v, styleState)} />
+                          <SliderControl label="Success box border radius" value={getGS('success_radius') || '12px'} onChange={(v:any) => updateGlobalStyle('success_radius', v, styleState)} min={0} max={50} />
+                          <FourWaySpacingControl label="Success box padding" value={getGS('success_padding') || '24px 32px'} onChange={(v:any) => updateGlobalStyle('success_padding', v, styleState)} />
+                          <div style={{ margin: '16px 0', borderTop: '1px solid #e2e8f0' }} />
+                          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>Typography</div>
+                          <div style={{ marginBottom: '20px' }}><Select label="Headline font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('success_titleFont') || 'inherit'} onChange={(v) => updateGlobalStyle('success_titleFont', v, styleState)} /></div>
+                          <ColorControl label="Headline color" value={getGS('success_titleColor') || '#166534'} onChange={(v:any) => updateGlobalStyle('success_titleColor', v, styleState)} />
+                          <SliderControl label="Headline size" value={getGS('success_titleSize') || '24px'} onChange={(v:any) => updateGlobalStyle('success_titleSize', v, styleState)} min={12} max={40} />
+                          <div style={{ marginBottom: '20px', marginTop: '12px' }}><Select label="Body font family" options={[{label:'Inherit',value:'inherit'},{label:'Inter',value:'Inter, sans-serif'},{label:'Roboto',value:'Roboto, sans-serif'}]} value={getGS('success_bodyFont') || 'inherit'} onChange={(v) => updateGlobalStyle('success_bodyFont', v, styleState)} /></div>
+                          <ColorControl label="Body color" value={getGS('success_bodyColor') || '#15803d'} onChange={(v:any) => updateGlobalStyle('success_bodyColor', v, styleState)} />
+                          <SliderControl label="Body size" value={getGS('success_bodySize') || '16px'} onChange={(v:any) => updateGlobalStyle('success_bodySize', v, styleState)} min={12} max={30} />
                         </Accordion>
                       </>
                       );
