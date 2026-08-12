@@ -25,6 +25,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     if (!form || form.shop !== shop) {
       return json({ error: "Form not found or unauthorized" }, { status: 404 });
     }
+    
+    // Increment views asynchronously
+    db.form.update({
+      where: { id: formId },
+      data: { views: { increment: 1 } }
+    }).catch(e => console.error("Failed to increment views", e));
 
     const rawGS = form.globalStyles ? JSON.parse(form.globalStyles) : {};
 

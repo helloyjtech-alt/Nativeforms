@@ -44,6 +44,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     include: { form: true, values: true }
   });
 
+  const viewsAggregation = await prisma.form.aggregate({
+    where: { shop },
+    _sum: { views: true }
+  });
+  
+  const totalViews = viewsAggregation._sum.views || 0;
+  
+  let conversionRate = "0.0%";
+  if (totalViews > 0) {
+    conversionRate = ((totalSubmissions / totalViews) * 100).toFixed(1) + "%";
+  }
+
   // Mock chart data for now
   const chartData = [
     { name: 'Mon', submissions: 12 },
@@ -58,13 +70,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return {
     totalForms,
     totalSubmissions,
+    totalViews,
+    conversionRate,
     recentSubmissions,
     chartData
   };
 };
 
 export default function Dashboard() {
-  const { totalForms, totalSubmissions, recentSubmissions, chartData } = useLoaderData<typeof loader>();
+  const { totalForms, totalSubmissions, totalViews, conversionRate, recentSubmissions, chartData } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
   return (
@@ -97,8 +111,8 @@ export default function Dashboard() {
               <Card padding="400">
                 <BlockStack gap="200">
                   <Text as="p" variant="bodyMd" tone="subdued">Form Views</Text>
-                  <Text as="h2" variant="headingLg">0</Text>
-                  <Text as="p" variant="bodySm" tone="subdued">Coming soon</Text>
+                  <Text as="h2" variant="headingLg">{totalViews}</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">All time</Text>
                 </BlockStack>
               </Card>
             </Grid.Cell>
@@ -107,8 +121,8 @@ export default function Dashboard() {
               <Card padding="400">
                 <BlockStack gap="200">
                   <Text as="p" variant="bodyMd" tone="subdued">Conversion Rate</Text>
-                  <Text as="h2" variant="headingLg">—</Text>
-                  <Text as="p" variant="bodySm" tone="subdued">Coming soon</Text>
+                  <Text as="h2" variant="headingLg">{conversionRate}</Text>
+                  <Text as="p" variant="bodySm" tone="subdued">Avg. all forms</Text>
                 </BlockStack>
               </Card>
             </Grid.Cell>
