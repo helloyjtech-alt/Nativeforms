@@ -51,7 +51,7 @@
     "@shopify/cli": "^4.6.0",
     "@shopify/plugin-cloudflare": "^4.6.0",
     "@types/eslint": "^9.6.1",
-    "@types/node": "^22.2.0",
+    "@types/node": "^26.2.0",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
